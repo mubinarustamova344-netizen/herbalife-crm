@@ -1,0 +1,197 @@
+{% extends 'base.html' %}
+{% block title %}{{ client.full_name }} — Herbalife CRM{% endblock %}
+{% block topbar_title %}<i class="bi bi-person-fill me-2 text-success"></i>{{ client.full_name }}{% endblock %}
+
+{% block content %}
+<div class="d-flex align-items-center gap-3 mb-4">
+  <a href="{{ url_for('clients') }}" class="btn btn-ghost">
+    <i class="bi bi-arrow-left me-1"></i>Mijozlar
+  </a>
+  <h1 class="page-title mb-0">{{ client.full_name }}</h1>
+</div>
+
+<div class="row g-3">
+
+  <!-- Left: profile card -->
+  <div class="col-lg-4">
+
+    <!-- Profile -->
+    <div class="card-box mb-3">
+      <div class="card-box-body text-center" style="padding-top:28px;padding-bottom:24px">
+        <div class="client-avatar mx-auto mb-3"
+             style="width:68px;height:68px;border-radius:18px;font-size:1.6rem">
+          {{ client.full_name[0]|upper }}
+        </div>
+        <div class="fw-800" style="font-size:1.1rem;color:#0d2318">{{ client.full_name }}</div>
+        <div class="text-muted mt-1 mb-3" style="font-size:.76rem">
+          {{ client.created_at.strftime('%d.%m.%Y') }}dan beri mijoz
+        </div>
+
+        {% if client.phone %}
+        <div class="d-flex align-items-center gap-2 mb-2 px-2" style="font-size:.82rem">
+          <div style="width:28px;height:28px;border-radius:8px;background:#e8f5ee;display:flex;align-items:center;justify-content:center">
+            <i class="bi bi-telephone text-success" style="font-size:.8rem"></i>
+          </div>
+          <span>{{ client.phone }}</span>
+        </div>
+        {% endif %}
+        {% if client.email %}
+        <div class="d-flex align-items-center gap-2 mb-2 px-2" style="font-size:.82rem">
+          <div style="width:28px;height:28px;border-radius:8px;background:#e8f5ee;display:flex;align-items:center;justify-content:center">
+            <i class="bi bi-envelope text-success" style="font-size:.8rem"></i>
+          </div>
+          <span>{{ client.email }}</span>
+        </div>
+        {% endif %}
+        {% if client.address %}
+        <div class="d-flex align-items-center gap-2 mb-2 px-2" style="font-size:.82rem">
+          <div style="width:28px;height:28px;border-radius:8px;background:#e8f5ee;display:flex;align-items:center;justify-content:center">
+            <i class="bi bi-geo-alt text-success" style="font-size:.8rem"></i>
+          </div>
+          <span>{{ client.address }}</span>
+        </div>
+        {% endif %}
+        {% if client.goal %}
+        <div class="d-flex align-items-center gap-2 px-2" style="font-size:.82rem">
+          <div style="width:28px;height:28px;border-radius:8px;background:#e8f5ee;display:flex;align-items:center;justify-content:center">
+            <i class="bi bi-bullseye text-success" style="font-size:.8rem"></i>
+          </div>
+          <span>{{ client.goal }}</span>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Weight card -->
+    {% if client.weight_start and client.weight_now %}
+    {% set diff = client.weight_now - client.weight_start %}
+    <div class="card-box mb-3">
+      <div class="card-box-header">
+        <div class="card-box-title"><i class="bi bi-graph-up-arrow"></i>Vazn dinamikasi</div>
+      </div>
+      <div class="card-box-body">
+        <div class="d-flex justify-content-between mb-3">
+          <div class="text-center">
+            <div class="fw-800" style="font-size:1.4rem;color:#0d2318">{{ client.weight_start }}</div>
+            <div class="text-muted" style="font-size:.7rem">Boshlang'ich kg</div>
+          </div>
+          <div class="text-center">
+            <div class="fw-800 {% if diff < 0 %}text-success{% else %}text-danger{% endif %}"
+                 style="font-size:1.4rem">{{ "%+.1f"|format(diff) }}</div>
+            <div class="text-muted" style="font-size:.7rem">O'zgarish kg</div>
+          </div>
+          <div class="text-center">
+            <div class="fw-800" style="font-size:1.4rem;color:#0d2318">{{ client.weight_now }}</div>
+            <div class="text-muted" style="font-size:.7rem">Hozirgi kg</div>
+          </div>
+        </div>
+        <div class="weight-progress">
+          {% set pct = [[((client.weight_start - client.weight_now) / client.weight_start * 100)|abs|round|int, 0]|max, 100]|min %}
+          <div class="weight-progress-fill {% if diff >= 0 %}bg-danger{% endif %}"
+               style="width:{{ pct }}%;{% if diff >= 0 %}background:#ef5350!important{% endif %}"></div>
+        </div>
+        <div class="text-center mt-2 text-muted" style="font-size:.72rem">
+          {% if diff < 0 %}✅ {{ (diff|abs)|round(1) }}kg yo'qotildi
+          {% else %}⬆️ {{ diff|round(1) }}kg qo'shildi{% endif %}
+        </div>
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- Stats -->
+    <div class="card-box mb-3">
+      <div class="card-box-body">
+        <div class="row text-center g-0">
+          <div class="col" style="border-right:1px solid #f0f5f2">
+            <div class="fw-800 text-hl" style="font-size:1.5rem">${{ "%.0f"|format(client.total_spent()) }}</div>
+            <div class="text-muted" style="font-size:.7rem">Jami xarid</div>
+          </div>
+          <div class="col">
+            <div class="fw-800" style="font-size:1.5rem;color:#0d2318">{{ orders|length }}</div>
+            <div class="text-muted" style="font-size:.7rem">Buyurtma</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    {% if client.notes %}
+    <div class="card-box mb-3">
+      <div class="card-box-header"><div class="card-box-title"><i class="bi bi-journal"></i>Izoh</div></div>
+      <div class="card-box-body"><p class="text-muted mb-0" style="font-size:.82rem">{{ client.notes }}</p></div>
+    </div>
+    {% endif %}
+
+    <!-- Action buttons -->
+    <div class="d-grid gap-2">
+      <a href="{{ url_for('order_add') }}" class="btn btn-hl py-2">
+        <i class="bi bi-bag-plus me-2"></i>Yangi buyurtma
+      </a>
+      <a href="{{ url_for('client_edit', cid=client.id) }}" class="btn btn-hl-outline">
+        <i class="bi bi-pencil me-2"></i>Tahrirlash
+      </a>
+      <form method="post" action="{{ url_for('client_delete', cid=client.id) }}"
+            onsubmit="return confirm('{{ client.full_name }} o\'chirilsinmi?')">
+        <button type="submit" class="btn btn-outline-danger w-100">
+          <i class="bi bi-trash me-1"></i>O'chirish
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Right: orders -->
+  <div class="col-lg-8">
+    <div class="card-box">
+      <div class="card-box-header">
+        <div class="card-box-title"><i class="bi bi-bag-fill"></i>Buyurtmalar tarixi</div>
+        <a href="{{ url_for('order_add') }}" class="btn btn-hl btn-sm px-3">
+          <i class="bi bi-plus me-1"></i>Yangi
+        </a>
+      </div>
+      <div class="table-responsive">
+        <table class="table mb-0">
+          <thead>
+            <tr><th>#</th><th>Sana</th><th>Summa</th><th>Komissiya</th><th>Status</th><th></th></tr>
+          </thead>
+          <tbody>
+            {% for o in orders %}
+            <tr>
+              <td>
+                <a href="{{ url_for('order_detail', oid=o.id) }}"
+                   class="text-decoration-none fw-700 text-hl">#{{ o.id }}</a>
+              </td>
+              <td class="text-muted" style="font-size:.78rem">{{ o.created_at.strftime('%d.%m.%Y %H:%M') }}</td>
+              <td><strong>${{ "%.2f"|format(o.total_price) }}</strong></td>
+              <td class="text-hl fw-700">${{ "%.2f"|format(o.commission(commission_pct)) }}</td>
+              <td>
+                {% if o.status == 'Yangi' %}
+                  <span class="status-badge status-new">🆕 {{ o.status }}</span>
+                {% elif o.status == "To'langan" %}
+                  <span class="status-badge status-paid">✅ {{ o.status }}</span>
+                {% elif o.status == 'Yetkazildi' %}
+                  <span class="status-badge status-shipped">📦 {{ o.status }}</span>
+                {% else %}
+                  <span class="status-badge status-cancel">❌ {{ o.status }}</span>
+                {% endif %}
+              </td>
+              <td>
+                <a href="{{ url_for('order_detail', oid=o.id) }}" class="btn btn-ghost btn-sm">Ko'rish</a>
+              </td>
+            </tr>
+            {% else %}
+            <tr>
+              <td colspan="6">
+                <div class="empty-state" style="padding:32px 20px">
+                  <div class="empty-icon" style="font-size:2rem">🛒</div>
+                  <p style="margin-bottom:12px">Hali buyurtma yo'q</p>
+                  <a href="{{ url_for('order_add') }}" class="btn btn-hl btn-sm">Buyurtma yaratish</a>
+                </div>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+{% block title %}Kirish — Herbalife CRM{% endblock %}
+
+{% block auth_content %}
+<div class="login-page">
+  <!-- Decorative circles -->
+  <div style="position:absolute;top:-80px;left:-80px;width:300px;height:300px;border-radius:50%;
+              background:rgba(0,114,63,.12);pointer-events:none"></div>
+  <div style="position:absolute;bottom:-60px;right:-60px;width:250px;height:250px;border-radius:50%;
+              background:rgba(0,114,63,.1);pointer-events:none"></div>
+
+  <div class="login-card">
+    <div class="login-logo-wrap">
+      <div class="login-logo-circle">🌿</div>
+      <div class="login-title">Herbalife CRM</div>
+      <div class="login-sub">Distribyutor boshqaruv tizimi</div>
+    </div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% for cat, msg in messages %}
+      <div class="alert alert-{{ cat }} py-2 text-center mb-3" style="font-size:.82rem;border-radius:10px">
+        {{ msg }}
+      </div>
+      {% endfor %}
+    {% endwith %}
+
+    <form method="post" autocomplete="on" id="loginForm">
+      <div class="mb-3">
+        <label class="form-label" for="username">
+          <i class="bi bi-person me-1" style="color:var(--hl-green)"></i>Login
+        </label>
+        <input id="username" name="username" type="text" class="form-control"
+               placeholder="admin" required autofocus
+               style="padding:11px 16px;font-size:.9rem">
+      </div>
+      <div class="mb-4">
+        <label class="form-label" for="password">
+          <i class="bi bi-lock me-1" style="color:var(--hl-green)"></i>Parol
+        </label>
+        <input id="password" name="password" type="password" class="form-control"
+               placeholder="••••••••" required
+               style="padding:11px 16px;font-size:.9rem">
+      </div>
+
+      <button type="submit" class="btn btn-hl w-100 py-2 mb-2" style="font-size:.9rem;border-radius:12px">
+        <i class="bi bi-box-arrow-in-right me-2"></i>Tizimga kirish
+      </button>
+    </form>
+
+    <button type="button" onclick="demoLogin()" class="btn w-100 py-2"
+            style="background:#e8f5ee;color:#00723F;border:2px solid #b8dfc8;
+                   border-radius:12px;font-size:.88rem;font-weight:700">
+      <i class="bi bi-lightning-charge-fill me-2"></i>Demo kirish (admin)
+    </button>
+
+    <div class="login-divider"></div>
+
+    <div class="text-center" style="font-size:.74rem;color:#a0b8a0">
+      <i class="bi bi-info-circle me-1"></i>
+      Demo: <strong>admin</strong> / <strong>herbalife123</strong>
+    </div>
+
+    <div class="text-center mt-3" style="font-size:.7rem;color:#c8d8c8">
+      🌿 Powered by Herbalife CRM &copy; 2025
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function demoLogin() {
+  document.getElementById('username').value = 'admin';
+  document.getElementById('password').value = 'herbalife123';
+  document.getElementById('loginForm').submit();
+}
+</script>
+{% endblock %}

@@ -1,0 +1,98 @@
+{% extends 'base.html' %}
+{% block title %}Buyurtmalar — Herbalife CRM{% endblock %}
+{% block topbar_title %}<i class="bi bi-bag-fill me-2 text-success"></i>Buyurtmalar{% endblock %}
+
+{% block content %}
+<div class="d-flex align-items-center justify-content-between mb-4">
+  <div>
+    <h1 class="page-title mb-1">Buyurtmalar</h1>
+    <p class="text-muted mb-0" style="font-size:.82rem">{{ orders|length }} ta buyurtma</p>
+  </div>
+  <a href="{{ url_for('order_add') }}" class="btn btn-hl px-4">
+    <i class="bi bi-bag-plus me-2"></i>Yangi buyurtma
+  </a>
+</div>
+
+<!-- Status filter -->
+<div class="filter-block mb-4">
+  <div class="filter-block-title"><i class="bi bi-funnel me-1"></i>Status bo'yicha</div>
+  <div class="filter-pills">
+    <a href="{{ url_for('orders') }}"
+       class="filter-pill {% if not status_f %}active{% endif %}">🌐 Barchasi</a>
+    <a href="{{ url_for('orders', status='Yangi') }}"
+       class="filter-pill {% if status_f == 'Yangi' %}active{% endif %}">🆕 Yangi</a>
+    {% set tolangan = "To'langan" %}
+    <a href="{{ url_for('orders', status=tolangan) }}"
+       class="filter-pill {% if status_f == tolangan %}active{% endif %}">✅ To'langan</a>
+    <a href="{{ url_for('orders', status='Yetkazildi') }}"
+       class="filter-pill {% if status_f == 'Yetkazildi' %}active{% endif %}">📦 Yetkazildi</a>
+    <a href="{{ url_for('orders', status='Bekor') }}"
+       class="filter-pill {% if status_f == 'Bekor' %}active{% endif %}">❌ Bekor</a>
+  </div>
+</div>
+
+{% if orders %}
+<div class="card-box">
+  <div class="table-responsive">
+    <table class="table mb-0">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Mijoz</th>
+          <th>Summa</th>
+          <th>Komissiya ({{ commission_pct }}%)</th>
+          <th>Status</th>
+          <th>Sana</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for o in orders %}
+        <tr>
+          <td>
+            <a href="{{ url_for('order_detail', oid=o.id) }}"
+               class="text-decoration-none fw-700 text-hl">#{{ o.id }}</a>
+          </td>
+          <td>
+            <a href="{{ url_for('client_detail', cid=o.client.id) }}"
+               class="text-decoration-none fw-600 text-dark">{{ o.client.full_name }}</a>
+            {% if o.client.phone %}
+            <div class="text-muted" style="font-size:.72rem">{{ o.client.phone }}</div>
+            {% endif %}
+          </td>
+          <td><strong style="font-size:.95rem">${{ "%.2f"|format(o.total_price) }}</strong></td>
+          <td class="text-hl fw-700">${{ "%.2f"|format(o.commission(commission_pct)) }}</td>
+          <td>
+            {% if o.status == 'Yangi' %}
+              <span class="status-badge status-new">🆕 {{ o.status }}</span>
+            {% elif o.status == "To'langan" %}
+              <span class="status-badge status-paid">✅ {{ o.status }}</span>
+            {% elif o.status == 'Yetkazildi' %}
+              <span class="status-badge status-shipped">📦 {{ o.status }}</span>
+            {% else %}
+              <span class="status-badge status-cancel">❌ {{ o.status }}</span>
+            {% endif %}
+          </td>
+          <td class="text-muted" style="font-size:.76rem">{{ o.created_at.strftime('%d.%m.%Y') }}</td>
+          <td>
+            <a href="{{ url_for('order_detail', oid=o.id) }}" class="btn btn-ghost btn-sm">
+              <i class="bi bi-eye me-1"></i>Ko'rish
+            </a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+{% else %}
+<div class="empty-state card-box">
+  <div class="empty-icon">🛒</div>
+  <p>Buyurtma topilmadi</p>
+  <a href="{{ url_for('order_add') }}" class="btn btn-hl">
+    <i class="bi bi-bag-plus me-2"></i>Yangi buyurtma
+  </a>
+</div>
+{% endif %}
+{% endblock %}

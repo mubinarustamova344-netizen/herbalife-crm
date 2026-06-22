@@ -1,0 +1,180 @@
+{% extends 'base.html' %}
+{% block title %}Yangi buyurtma — Herbalife CRM{% endblock %}
+{% block topbar_title %}<i class="bi bi-bag-plus me-2 text-success"></i>Yangi buyurtma{% endblock %}
+
+{% block content %}
+<div class="d-flex align-items-center gap-3 mb-4">
+  <a href="{{ url_for('orders') }}" class="btn btn-ghost">
+    <i class="bi bi-arrow-left me-1"></i>Orqaga
+  </a>
+  <h1 class="page-title mb-0">Yangi buyurtma</h1>
+</div>
+
+<form method="post" id="order-form">
+<div class="row g-3">
+
+  <!-- Left: items -->
+  <div class="col-lg-8">
+    <div class="card-box">
+      <div class="card-box-header">
+        <div class="card-box-title"><i class="bi bi-list-check"></i>Mahsulotlar</div>
+        <button type="button" id="add-row" class="btn btn-ghost btn-sm">
+          <i class="bi bi-plus-lg me-1"></i>Qo'shish
+        </button>
+      </div>
+      <div class="table-responsive">
+        <table class="table align-middle mb-0" id="items-table">
+          <thead>
+            <tr>
+              <th style="min-width:180px">Mahsulot</th>
+              <th style="width:90px">Miqdor</th>
+              <th style="width:120px">Narx ($)</th>
+              <th style="width:100px">Jami</th>
+              <th style="width:40px"></th>
+            </tr>
+          </thead>
+          <tbody id="items-body">
+            <tr class="item-row">
+              <td>
+                <select name="product_id[]" class="form-select form-select-sm product-sel" required>
+                  <option value="">— tanlang —</option>
+                  {% for p in products %}
+                  <option value="{{ p.id }}" data-price="{{ p.price }}" data-stock="{{ p.stock }}">
+                    {{ p.name }} — ${{ "%.2f"|format(p.price) }}
+                  </option>
+                  {% endfor %}
+                </select>
+              </td>
+              <td><input name="qty[]" type="number" min="1" value="1" class="form-control form-control-sm qty-inp" required></td>
+              <td><input name="unit_price[]" type="number" step="0.01" min="0" class="form-control form-control-sm price-inp" required></td>
+              <td class="fw-700 row-total text-hl">$0.00</td>
+              <td>
+                <button type="button" class="btn btn-sm btn-outline-danger remove-row" style="padding:4px 8px">
+                  <i class="bi bi-x"></i>
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Right: info + total -->
+  <div class="col-lg-4">
+    <div class="card-box mb-3">
+      <div class="card-box-header">
+        <div class="card-box-title"><i class="bi bi-person"></i>Mijoz va holat</div>
+      </div>
+      <div class="card-box-body">
+        <div class="mb-3">
+          <label class="form-label">Mijoz *</label>
+          <select name="client_id" class="form-select" required>
+            <option value="">— tanlang —</option>
+            {% for c in clients %}
+            <option value="{{ c.id }}">{{ c.full_name }}{% if c.phone %} ({{ c.phone }}){% endif %}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Status</label>
+          <select name="status" class="form-select">
+            <option>Yangi</option>
+            <option>To'langan</option>
+            <option>Yetkazildi</option>
+          </select>
+        </div>
+        <div>
+          <label class="form-label">Izoh</label>
+          <textarea name="notes" class="form-control" rows="2" placeholder="..."></textarea>
+        </div>
+      </div>
+    </div>
+
+    <!-- Total -->
+    <div class="card-box" style="border:2px solid var(--hl-green)">
+      <div class="card-box-body">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <span class="text-muted" style="font-size:.82rem">Jami summa:</span>
+          <span id="grand-total" class="fw-800 text-hl" style="font-size:1.3rem">$0.00</span>
+        </div>
+        <div class="d-flex justify-content-between align-items-center mb-3 pb-3"
+             style="border-bottom:1px dashed #e0eae4">
+          <span class="text-muted" style="font-size:.82rem">Komissiyangiz (25%):</span>
+          <span id="commission-val" class="fw-700" style="color:#7b1fa2;font-size:1rem">$0.00</span>
+        </div>
+        <button type="submit" class="btn btn-hl w-100 py-2">
+          <i class="bi bi-check-circle me-2"></i>Buyurtmani saqlash
+        </button>
+        <a href="{{ url_for('orders') }}" class="btn btn-ghost w-100 mt-2">Bekor qilish</a>
+      </div>
+    </div>
+  </div>
+</div>
+</form>
+
+<template id="row-tpl">
+  <tr class="item-row">
+    <td>
+      <select name="product_id[]" class="form-select form-select-sm product-sel" required>
+        <option value="">— tanlang —</option>
+        {% for p in products %}
+        <option value="{{ p.id }}" data-price="{{ p.price }}" data-stock="{{ p.stock }}">
+          {{ p.name }} — ${{ "%.2f"|format(p.price) }}
+        </option>
+        {% endfor %}
+      </select>
+    </td>
+    <td><input name="qty[]" type="number" min="1" value="1" class="form-control form-control-sm qty-inp" required></td>
+    <td><input name="unit_price[]" type="number" step="0.01" min="0" class="form-control form-control-sm price-inp" required></td>
+    <td class="fw-700 row-total text-hl">$0.00</td>
+    <td>
+      <button type="button" class="btn btn-sm btn-outline-danger remove-row" style="padding:4px 8px">
+        <i class="bi bi-x"></i>
+      </button>
+    </td>
+  </tr>
+</template>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function calcRow(row) {
+  const qty   = parseFloat(row.querySelector('.qty-inp').value) || 0;
+  const price = parseFloat(row.querySelector('.price-inp').value) || 0;
+  const t = qty * price;
+  row.querySelector('.row-total').textContent = '$' + t.toFixed(2);
+  return t;
+}
+function calcAll() {
+  let g = 0;
+  document.querySelectorAll('.item-row').forEach(r => g += calcRow(r));
+  document.getElementById('grand-total').textContent = '$' + g.toFixed(2);
+  document.getElementById('commission-val').textContent = '$' + (g * 0.25).toFixed(2);
+}
+
+document.getElementById('items-body').addEventListener('input', e => {
+  const row = e.target.closest('.item-row');
+  if (!row) return;
+  if (e.target.classList.contains('product-sel')) {
+    const opt = e.target.selectedOptions[0];
+    if (opt?.dataset.price) row.querySelector('.price-inp').value = opt.dataset.price;
+  }
+  calcAll();
+});
+
+document.getElementById('add-row').addEventListener('click', () => {
+  const clone = document.getElementById('row-tpl').content.cloneNode(true);
+  document.getElementById('items-body').appendChild(clone);
+});
+
+document.getElementById('items-body').addEventListener('click', e => {
+  if (e.target.closest('.remove-row')) {
+    if (document.querySelectorAll('.item-row').length > 1) {
+      e.target.closest('.item-row').remove();
+      calcAll();
+    }
+  }
+});
+</script>
+{% endblock %}

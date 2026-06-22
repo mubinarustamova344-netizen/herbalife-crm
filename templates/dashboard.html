@@ -1,0 +1,343 @@
+{% extends 'base.html' %}
+{% block title %}Dashboard — Herbalife CRM{% endblock %}
+{% block topbar_title %}<i class="bi bi-grid-1x2-fill me-2 text-success"></i>Dashboard{% endblock %}
+
+{% block content %}
+
+<!-- Welcome banner -->
+<div class="welcome-banner mb-4">
+  <div class="welcome-text">
+    <div class="welcome-hi">Xush kelibsiz, Admin! 👋</div>
+    <div class="welcome-sub">Herbalife distribyutor panelingiz — bugungi holat</div>
+  </div>
+  <div class="d-flex gap-2">
+    <a href="{{ url_for('client_add') }}" class="btn btn-hl px-3">
+      <i class="bi bi-person-plus me-1"></i> Mijoz qo'shish
+    </a>
+    <a href="{{ url_for('order_add') }}" class="btn btn-orange px-3">
+      <i class="bi bi-bag-plus me-1"></i> Buyurtma
+    </a>
+  </div>
+</div>
+
+<!-- ── Stats ───────────────────────────────────────────────────── -->
+<div class="row g-3 mb-4">
+  <div class="col-6 col-xl-3">
+    <div class="stat-card green">
+      <div class="stat-icon green">👥</div>
+      <div class="stat-value" id="cnt-clients">{{ total_clients }}</div>
+      <div class="stat-label">Jami mijozlar</div>
+      <div class="stat-sub">
+        <a href="{{ url_for('clients') }}" class="text-hl text-decoration-none fw-600" style="font-size:.72rem">
+          Ko'rish <i class="bi bi-arrow-right"></i>
+        </a>
+      </div>
+    </div>
+  </div>
+  <div class="col-6 col-xl-3">
+    <div class="stat-card blue">
+      <div class="stat-icon blue">🛒</div>
+      <div class="stat-value" id="cnt-orders">{{ total_orders }}</div>
+      <div class="stat-label">Jami buyurtmalar</div>
+      <div class="stat-sub">
+        <a href="{{ url_for('orders') }}" class="text-primary text-decoration-none fw-600" style="font-size:.72rem">
+          Ko'rish <i class="bi bi-arrow-right"></i>
+        </a>
+      </div>
+    </div>
+  </div>
+  <div class="col-6 col-xl-3">
+    <div class="stat-card orange">
+      <div class="stat-icon orange">💰</div>
+      <div class="stat-value" style="color:#e65100">${{ "%.0f"|format(total_revenue) }}</div>
+      <div class="stat-label">Jami daromad</div>
+      <div class="stat-sub" style="color:#a0b8a4">
+        Bu oy: <strong style="color:#e65100">${{ "%.0f"|format(monthly_revenue) }}</strong>
+      </div>
+    </div>
+  </div>
+  <div class="col-6 col-xl-3">
+    <div class="stat-card purple">
+      <div class="stat-icon purple">🏆</div>
+      <div class="stat-value" style="color:#7b1fa2">${{ "%.0f"|format(total_commission) }}</div>
+      <div class="stat-label">Komissiya ({{ commission_pct }}%)</div>
+      <div class="stat-sub" style="color:#a0b8a4">
+        Bu oy: <strong style="color:#7b1fa2">${{ "%.0f"|format(monthly_commission) }}</strong>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Monthly Goal ───────────────────────────────────────────────── -->
+<div class="card-box mb-4" style="background:linear-gradient(135deg,#0d2318,#0a1e14);border:none">
+  <div class="card-box-body" style="padding:20px 24px">
+    <div class="row align-items-center">
+      <div class="col-lg-5 mb-3 mb-lg-0">
+        <div style="font-size:.68rem;letter-spacing:3px;color:rgba(255,255,255,.45);text-transform:uppercase;margin-bottom:4px">
+          Oylik Maqsad
+        </div>
+        <div style="font-size:1.5rem;font-weight:800;color:#fff">
+          💰 ${{ "%.0f"|format(monthly_commission) }}
+          <span style="font-size:.8rem;font-weight:400;color:rgba(255,255,255,.45)">/ ${{ monthly_goal }}</span>
+        </div>
+        <div style="font-size:.78rem;color:rgba(255,255,255,.55);margin-top:2px">
+          Bu oylik komissiya daromadingiz
+        </div>
+      </div>
+      <div class="col-lg-7">
+        <div class="d-flex justify-content-between mb-1">
+          <span style="font-size:.72rem;color:rgba(255,255,255,.55)">Progress</span>
+          <span style="font-size:.72rem;font-weight:700;color:{% if goal_pct >= 100 %}#69f0ae{% elif goal_pct >= 60 %}#ffca28{% else %}#ff7043{% endif %}">
+            {{ goal_pct }}%
+          </span>
+        </div>
+        <div style="height:10px;background:rgba(255,255,255,.1);border-radius:5px;overflow:hidden">
+          <div style="height:100%;width:{{ goal_pct }}%;border-radius:5px;transition:width 1s;
+               background:{% if goal_pct >= 100 %}linear-gradient(90deg,#00c853,#69f0ae)
+               {% elif goal_pct >= 60 %}linear-gradient(90deg,#f9a825,#ffca28)
+               {% else %}linear-gradient(90deg,#e64a19,#ff7043){% endif %}">
+          </div>
+        </div>
+        <div class="d-flex justify-content-between mt-2">
+          {% if goal_pct < 100 %}
+          <span style="font-size:.7rem;color:rgba(255,255,255,.4)">
+            Qoldi: <strong style="color:rgba(255,255,255,.7)">${{ (monthly_goal - monthly_commission)|int }}</strong>
+          </span>
+          {% else %}
+          <span style="font-size:.7rem;color:#69f0ae;font-weight:700">🎉 Maqsadga yetdingiz!</span>
+          {% endif %}
+          <div class="d-flex gap-2">
+            <a href="{{ url_for('napitki') }}" style="font-size:.7rem;color:rgba(255,255,255,.4);text-decoration:none">
+              🥤 Kokteylar
+            </a>
+            <a href="{{ url_for('calculator') }}" style="font-size:.7rem;color:rgba(255,255,255,.4);text-decoration:none">
+              🧮 Kalkulyator
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Charts ────────────────────────────────────────────────────── -->
+<div class="row g-3 mb-4">
+  <div class="col-lg-8">
+    <div class="card-box">
+      <div class="card-box-header">
+        <div class="card-box-title">
+          <i class="bi bi-bar-chart-fill"></i> Oylik savdo (so'nggi 6 oy)
+        </div>
+        <a href="{{ url_for('reports') }}" class="btn btn-ghost btn-sm">
+          <i class="bi bi-arrow-up-right me-1"></i>Batafsil
+        </a>
+      </div>
+      <div class="card-box-body" style="padding-top:12px">
+        <canvas id="salesChart" height="85"></canvas>
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-4">
+    <div class="card-box" style="height:100%">
+      <div class="card-box-header">
+        <div class="card-box-title"><i class="bi bi-pie-chart-fill"></i>Buyurtma statuslari</div>
+      </div>
+      <div class="card-box-body d-flex flex-column align-items-center justify-content-center">
+        <canvas id="statusChart" style="max-height:200px"></canvas>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Recent Orders + Top + Quick Actions ────────────────────── -->
+<div class="row g-3">
+  <div class="col-lg-7">
+    <div class="card-box">
+      <div class="card-box-header">
+        <div class="card-box-title"><i class="bi bi-clock-history"></i>Oxirgi buyurtmalar</div>
+        <a href="{{ url_for('orders') }}" class="btn btn-hl btn-sm px-3">
+          Hammasi <i class="bi bi-arrow-right ms-1"></i>
+        </a>
+      </div>
+      <div class="table-responsive">
+        <table class="table mb-0">
+          <thead>
+            <tr>
+              <th>#</th><th>Mijoz</th><th>Summa</th><th>Status</th><th>Sana</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for o in recent_orders %}
+            <tr>
+              <td>
+                <a href="{{ url_for('order_detail', oid=o.id) }}"
+                   class="text-decoration-none fw-700 text-hl">#{{ o.id }}</a>
+              </td>
+              <td class="fw-600">{{ o.client.full_name }}</td>
+              <td><strong>${{ "%.2f"|format(o.total_price) }}</strong></td>
+              <td>
+                {% if o.status == 'Yangi' %}
+                  <span class="status-badge status-new">🆕 {{ o.status }}</span>
+                {% elif o.status == "To'langan" %}
+                  <span class="status-badge status-paid">✅ {{ o.status }}</span>
+                {% elif o.status == 'Yetkazildi' %}
+                  <span class="status-badge status-shipped">📦 {{ o.status }}</span>
+                {% else %}
+                  <span class="status-badge status-cancel">❌ {{ o.status }}</span>
+                {% endif %}
+              </td>
+              <td class="text-muted" style="font-size:.75rem">{{ o.created_at.strftime('%d.%m.%Y') }}</td>
+            </tr>
+            {% else %}
+            <tr>
+              <td colspan="5" class="text-center text-muted py-4">
+                <i class="bi bi-bag" style="font-size:1.5rem;opacity:.3"></i>
+                <div class="mt-2">Hali buyurtma yo'q</div>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-5">
+    <!-- Top clients -->
+    <div class="card-box mb-3">
+      <div class="card-box-header">
+        <div class="card-box-title"><i class="bi bi-trophy-fill" style="color:#f5a623"></i>Top 5 mijoz</div>
+        <a href="{{ url_for('clients') }}" class="btn btn-ghost btn-sm">Barchasi</a>
+      </div>
+      <div class="table-responsive">
+        <table class="table mb-0">
+          <tbody>
+            {% for client, spent in top_clients %}
+            <tr>
+              <td style="width:32px;padding-right:0">
+                <div style="width:28px;height:28px;border-radius:8px;background:linear-gradient(135deg,#00723F,#00b860);
+                     display:flex;align-items:center;justify-content:center;color:#fff;font-size:.75rem;font-weight:800">
+                  {{ loop.index }}
+                </div>
+              </td>
+              <td>
+                <a href="{{ url_for('client_detail', cid=client.id) }}"
+                   class="text-decoration-none fw-600 text-dark">{{ client.full_name }}</a>
+              </td>
+              <td class="text-end">
+                <strong class="text-hl">${{ "%.0f"|format(spent) }}</strong>
+              </td>
+            </tr>
+            {% else %}
+            <tr><td colspan="3" class="text-center text-muted py-3">Ma'lumot yo'q</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Quick actions -->
+    <div class="card-box">
+      <div class="card-box-header">
+        <div class="card-box-title"><i class="bi bi-lightning-fill" style="color:#f5a623"></i>Tezkor amallar</div>
+      </div>
+      <div class="card-box-body" style="padding-top:10px">
+        <a href="{{ url_for('client_add') }}" class="quick-action">
+          <div class="quick-action-icon" style="background:#e8f5ee">👤</div>
+          <div class="quick-action-text">Yangi mijoz qo'shish</div>
+          <i class="bi bi-chevron-right ms-auto text-muted"></i>
+        </a>
+        <a href="{{ url_for('order_add') }}" class="quick-action">
+          <div class="quick-action-icon" style="background:#fff3e0">🛒</div>
+          <div class="quick-action-text">Yangi buyurtma yaratish</div>
+          <i class="bi bi-chevron-right ms-auto text-muted"></i>
+        </a>
+        <a href="{{ url_for('product_add') }}" class="quick-action">
+          <div class="quick-action-icon" style="background:#f3e5f5">📦</div>
+          <div class="quick-action-text">Yangi mahsulot qo'shish</div>
+          <i class="bi bi-chevron-right ms-auto text-muted"></i>
+        </a>
+        <a href="{{ url_for('reports') }}" class="quick-action" style="margin-bottom:0">
+          <div class="quick-action-icon" style="background:#e3f2fd">📊</div>
+          <div class="quick-action-text">Hisobotlarni ko'rish</div>
+          <i class="bi bi-chevron-right ms-auto text-muted"></i>
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<style>
+.welcome-banner {
+  background: linear-gradient(135deg, #00723F 0%, #005530 50%, #0d3322 100%);
+  border-radius: 16px; padding: 24px 28px;
+  display: flex; align-items: center; justify-content: space-between;
+  box-shadow: 0 8px 32px rgba(0,114,63,.3);
+}
+.welcome-hi { color: #fff; font-size: 1.15rem; font-weight: 700; margin-bottom: 4px; }
+.welcome-sub { color: rgba(255,255,255,.65); font-size: .82rem; }
+</style>
+
+<script>
+const labels = {{ monthly_data | map(attribute='label') | list | tojson }};
+const revenues = {{ monthly_data | map(attribute='total') | list | tojson }};
+const commData = revenues.map(r => Math.round(r * {{ commission_pct }} / 100 * 100) / 100);
+
+new Chart(document.getElementById('salesChart'), {
+  type: 'bar',
+  data: {
+    labels,
+    datasets: [
+      {
+        label: 'Savdo ($)',
+        data: revenues,
+        backgroundColor: 'rgba(0,114,63,.75)',
+        borderRadius: 8,
+        borderSkipped: false,
+      },
+      {
+        label: 'Komissiya ($)',
+        data: commData,
+        backgroundColor: 'rgba(123,31,162,.5)',
+        borderRadius: 8,
+        borderSkipped: false,
+      }
+    ]
+  },
+  options: {
+    responsive: true,
+    plugins: {
+      legend: { position: 'bottom', labels: { font: { size: 11, family: 'Poppins' }, padding: 16 } }
+    },
+    scales: {
+      y: { beginAtZero: true, grid: { color: '#f0f5f2' }, ticks: { font: { size: 10 } } },
+      x: { grid: { display: false }, ticks: { font: { size: 10 } } }
+    }
+  }
+});
+
+const statusData = {{ status_data | tojson }};
+if (Object.keys(statusData).length) {
+  new Chart(document.getElementById('statusChart'), {
+    type: 'doughnut',
+    data: {
+      labels: Object.keys(statusData),
+      datasets: [{
+        data: Object.values(statusData),
+        backgroundColor: ['#0288d1','#00723F','#8e24aa','#d32f2f'],
+        borderWidth: 3, borderColor: '#fff',
+        hoverOffset: 6,
+      }]
+    },
+    options: {
+      responsive: true, cutout: '68%',
+      plugins: {
+        legend: { position: 'bottom', labels: { font: { size: 10, family:'Poppins' }, padding: 10 } }
+      }
+    }
+  });
+}
+</script>
+{% endblock %}

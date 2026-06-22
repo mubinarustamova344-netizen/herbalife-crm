@@ -1,0 +1,131 @@
+{% extends 'base.html' %}
+{% block title %}Buyurtma #{{ order.id }} — Herbalife CRM{% endblock %}
+{% block topbar_title %}<i class="bi bi-bag-fill me-2 text-success"></i>Buyurtma #{{ order.id }}{% endblock %}
+
+{% block content %}
+<div class="d-flex align-items-center gap-3 mb-4">
+  <a href="{{ url_for('orders') }}" class="btn btn-ghost">
+    <i class="bi bi-arrow-left me-1"></i>Buyurtmalar
+  </a>
+  <h1 class="page-title mb-0">Buyurtma #{{ order.id }}</h1>
+  {% if order.status == 'Yangi' %}
+    <span class="status-badge status-new" style="font-size:.82rem;padding:6px 14px">🆕 {{ order.status }}</span>
+  {% elif order.status == "To'langan" %}
+    <span class="status-badge status-paid" style="font-size:.82rem;padding:6px 14px">✅ {{ order.status }}</span>
+  {% elif order.status == 'Yetkazildi' %}
+    <span class="status-badge status-shipped" style="font-size:.82rem;padding:6px 14px">📦 {{ order.status }}</span>
+  {% else %}
+    <span class="status-badge status-cancel" style="font-size:.82rem;padding:6px 14px">❌ {{ order.status }}</span>
+  {% endif %}
+</div>
+
+<div class="row g-3">
+  <!-- Items table -->
+  <div class="col-lg-8">
+    <div class="card-box mb-3">
+      <div class="card-box-header">
+        <div class="card-box-title"><i class="bi bi-receipt"></i>Buyurtma tarkibi</div>
+      </div>
+      <div class="table-responsive">
+        <table class="table mb-0">
+          <thead>
+            <tr><th>Mahsulot</th><th>Narx</th><th>Miqdor</th><th>Jami</th></tr>
+          </thead>
+          <tbody>
+            {% for item in order.items %}
+            <tr>
+              <td>
+                <div class="fw-700">{{ item.product.name }}</div>
+                <div class="text-muted" style="font-size:.72rem">{{ item.product.category }}</div>
+              </td>
+              <td>${{ "%.2f"|format(item.unit_price) }}</td>
+              <td>
+                <span class="fw-700" style="background:#f0f5f2;padding:3px 10px;border-radius:8px">
+                  × {{ item.qty }}
+                </span>
+              </td>
+              <td class="fw-700 text-hl">${{ "%.2f"|format(item.qty * item.unit_price) }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+          <tfoot>
+            <tr style="background:#f8fdf9">
+              <td colspan="3" class="text-end fw-700 text-muted">Jami summa:</td>
+              <td class="fw-800 text-hl" style="font-size:1.15rem">${{ "%.2f"|format(order.total_price) }}</td>
+            </tr>
+            <tr>
+              <td colspan="3" class="text-end text-muted" style="font-size:.82rem">
+                Komissiya ({{ commission_pct }}%):
+              </td>
+              <td class="fw-700" style="color:#7b1fa2">${{ "%.2f"|format(order.commission(commission_pct)) }}</td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+    </div>
+
+    {% if order.notes %}
+    <div class="card-box">
+      <div class="card-box-header"><div class="card-box-title"><i class="bi bi-journal"></i>Izoh</div></div>
+      <div class="card-box-body"><p class="text-muted mb-0">{{ order.notes }}</p></div>
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- Right: info & actions -->
+  <div class="col-lg-4">
+    <div class="card-box mb-3">
+      <div class="card-box-header">
+        <div class="card-box-title"><i class="bi bi-info-circle"></i>Ma'lumotlar</div>
+      </div>
+      <div class="card-box-body">
+        <div class="mb-3">
+          <div class="text-muted" style="font-size:.72rem;margin-bottom:3px">Mijoz</div>
+          <a href="{{ url_for('client_detail', cid=order.client.id) }}"
+             class="text-decoration-none fw-700 text-hl">{{ order.client.full_name }}</a>
+          {% if order.client.phone %}
+          <div class="text-muted" style="font-size:.76rem">{{ order.client.phone }}</div>
+          {% endif %}
+        </div>
+        <div class="mb-3">
+          <div class="text-muted" style="font-size:.72rem;margin-bottom:3px">Yaratilgan</div>
+          <div class="fw-600">{{ order.created_at.strftime('%d.%m.%Y %H:%M') }}</div>
+        </div>
+        <div style="background:#f5faf7;border-radius:12px;padding:14px;text-align:center">
+          <div class="text-muted" style="font-size:.72rem">Daromad (sizning komissiyangiz)</div>
+          <div class="fw-800" style="font-size:1.6rem;color:#7b1fa2">
+            ${{ "%.2f"|format(order.commission(commission_pct)) }}
+          </div>
+          <div class="text-muted" style="font-size:.7rem">{{ commission_pct }}% × ${{ "%.2f"|format(order.total_price) }}</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Status change -->
+    <div class="card-box mb-3">
+      <div class="card-box-header">
+        <div class="card-box-title"><i class="bi bi-arrow-repeat"></i>Status o'zgartirish</div>
+      </div>
+      <div class="card-box-body">
+        <form method="post" action="{{ url_for('order_status', oid=order.id) }}">
+          <select name="status" class="form-select mb-3">
+            {% for s in ['Yangi', "To'langan", 'Yetkazildi', 'Bekor'] %}
+            <option {% if s == order.status %}selected{% endif %}>{{ s }}</option>
+            {% endfor %}
+          </select>
+          <button type="submit" class="btn btn-hl w-100">
+            <i class="bi bi-check-circle me-2"></i>Saqlash
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <form method="post" action="{{ url_for('order_delete', oid=order.id) }}"
+          onsubmit="return confirm('Buyurtma #{{ order.id }} o\'chirilsinmi?')">
+      <button type="submit" class="btn btn-outline-danger w-100">
+        <i class="bi bi-trash me-1"></i>Buyurtmani o'chirish
+      </button>
+    </form>
+  </div>
+</div>
+{% endblock %}

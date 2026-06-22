@@ -1,0 +1,114 @@
+{% extends 'base.html' %}
+{% block title %}{{ 'Tahrirlash' if client else 'Yangi mijoz' }} — Herbalife CRM{% endblock %}
+{% block topbar_title %}
+  <i class="bi bi-person me-2 text-success"></i>{{ 'Tahrirlash' if client else 'Yangi mijoz' }}
+{% endblock %}
+
+{% block content %}
+<div class="d-flex align-items-center gap-3 mb-4">
+  <a href="{{ url_for('client_detail', cid=client.id) if client else url_for('clients') }}"
+     class="btn btn-ghost">
+    <i class="bi bi-arrow-left me-1"></i>Orqaga
+  </a>
+  <h1 class="page-title mb-0">{{ 'Mijozni tahrirlash' if client else 'Yangi mijoz qo\'shish' }}</h1>
+</div>
+
+<div style="max-width:700px">
+<form method="post">
+
+  <!-- Personal info -->
+  <div class="form-card mb-3">
+    <div class="form-card-title"><i class="bi bi-person-circle"></i>Shaxsiy ma'lumotlar</div>
+    <div class="row g-3">
+      <div class="col-md-6">
+        <label class="form-label">To'liq ism *</label>
+        <input name="full_name" class="form-control" required
+               value="{{ client.full_name if client else '' }}" placeholder="Ism Familiya">
+      </div>
+      <div class="col-md-6">
+        <label class="form-label">Telefon raqam</label>
+        <div class="input-group">
+          <span class="input-group-text" style="border-radius:10px 0 0 10px;border:1.5px solid #d8e8dc;border-right:none;background:#f5faf7">
+            <i class="bi bi-telephone text-success"></i>
+          </span>
+          <input name="phone" class="form-control" type="tel"
+                 value="{{ client.phone if client else '' }}" placeholder="+998 90 000 00 00"
+                 style="border-radius:0 10px 10px 0">
+        </div>
+      </div>
+      <div class="col-md-6">
+        <label class="form-label">Email</label>
+        <div class="input-group">
+          <span class="input-group-text" style="border-radius:10px 0 0 10px;border:1.5px solid #d8e8dc;border-right:none;background:#f5faf7">
+            <i class="bi bi-envelope text-success"></i>
+          </span>
+          <input name="email" class="form-control" type="email"
+                 value="{{ client.email if client else '' }}" placeholder="email@mail.com"
+                 style="border-radius:0 10px 10px 0">
+        </div>
+      </div>
+      <div class="col-md-6">
+        <label class="form-label">Manzil</label>
+        <input name="address" class="form-control"
+               value="{{ client.address if client else '' }}" placeholder="Shahar, ko'cha">
+      </div>
+      <div class="col-12">
+        <label class="form-label">Maqsad / Yo'nalish</label>
+        <input name="goal" class="form-control" list="goals-list"
+               value="{{ client.goal if client else '' }}"
+               placeholder="Vazn kamaytirish, energiya, go'zallik...">
+        <datalist id="goals-list">
+          <option>Vazn kamaytirish</option>
+          <option>Muskul ko'paytirish</option>
+          <option>Energiyani oshirish</option>
+          <option>Sog'lom turmush tarzi</option>
+          <option>Go'zallik va teri parvarishi</option>
+          <option>Immunitetni mustahkamlash</option>
+          <option>Detoks va tozalanish</option>
+        </datalist>
+      </div>
+    </div>
+  </div>
+
+  <!-- Weight tracking -->
+  <div class="form-card mb-3">
+    <div class="form-card-title"><i class="bi bi-graph-up-arrow"></i>Vazn kuzatish</div>
+    <div class="row g-3">
+      <div class="col-md-6">
+        <label class="form-label">Boshlang'ich vazn (kg)</label>
+        <div class="input-group">
+          <input name="weight_start" class="form-control" type="number" step="0.1"
+                 value="{{ client.weight_start if client else '' }}" placeholder="72.5"
+                 style="border-radius:10px 0 0 10px">
+          <span class="input-group-text" style="border-radius:0 10px 10px 0;background:#f5faf7;font-size:.8rem;font-weight:600">kg</span>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <label class="form-label">Hozirgi vazn (kg)</label>
+        <div class="input-group">
+          <input name="weight_now" class="form-control" type="number" step="0.1"
+                 value="{{ client.weight_now if client else '' }}" placeholder="68.0"
+                 style="border-radius:10px 0 0 10px">
+          <span class="input-group-text" style="border-radius:0 10px 10px 0;background:#f5faf7;font-size:.8rem;font-weight:600">kg</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Notes -->
+  <div class="form-card mb-4">
+    <div class="form-card-title"><i class="bi bi-journal-text"></i>Izohlar</div>
+    <textarea name="notes" class="form-control" rows="3"
+              placeholder="Qo'shimcha ma'lumotlar, eslatmalar...">{{ client.notes if client else '' }}</textarea>
+  </div>
+
+  <div class="d-flex gap-3">
+    <button type="submit" class="btn btn-hl px-5 py-2">
+      <i class="bi bi-check-circle me-2"></i>{{ 'Saqlash' if client else 'Qo\'shish' }}
+    </button>
+    <a href="{{ url_for('client_detail', cid=client.id) if client else url_for('clients') }}"
+       class="btn btn-ghost px-4 py-2">Bekor qilish</a>
+  </div>
+</form>
+</div>
+{% endblock %}

@@ -1,0 +1,189 @@
+{% extends 'base.html' %}
+{% block title %}Katalog — Herbalife CRM{% endblock %}
+{% block topbar_title %}<i class="bi bi-file-earmark-pdf-fill me-2 text-danger"></i>Mahsulot Katalogi{% endblock %}
+
+{% block content %}
+
+<!-- Print toolbar (hidden when printing) -->
+<div class="d-flex align-items-center justify-content-between mb-4 no-print">
+  <div>
+    <h1 class="page-title mb-1">Mahsulot Katalogi</h1>
+    <p class="text-muted mb-0" style="font-size:.82rem">Chop qilish yoki PDF saqlab WhatsApp-da ulashing</p>
+  </div>
+  <div class="d-flex gap-2">
+    <button onclick="window.print()" class="btn btn-hl px-4">
+      <i class="bi bi-printer-fill me-2"></i>Chop qilish / PDF
+    </button>
+    <a href="{{ url_for('products') }}" class="btn btn-ghost">Orqaga</a>
+  </div>
+</div>
+
+<!-- PRINTABLE CATALOG -->
+<div id="catalog-print-area">
+
+  <!-- Cover page -->
+  <div class="catalog-cover page-break-after">
+    <div class="catalog-cover-inner">
+      <div class="catalog-logo">🌿</div>
+      <div class="catalog-brand">HERBALIFE</div>
+      <div class="catalog-title">Mahsulotlar Katalogi</div>
+      <div class="catalog-subtitle">Professional Distribyutor Portali</div>
+      <div class="catalog-divider"></div>
+      <div class="catalog-tagline">Sog'lom hayot — Faol hayot</div>
+    </div>
+  </div>
+
+  <!-- Products by category -->
+  {% for cat, products in cats.items() %}
+  <div class="catalog-section">
+    <div class="catalog-cat-header">
+      {% if cat == 'Коктейль' %}🥛{% elif cat == 'Напиток' %}🍃{% elif cat == 'Витамины' %}💊{% elif cat == 'Красота' %}✨{% else %}🌿{% endif %}
+      {{ cat }}
+    </div>
+
+    <div class="catalog-grid">
+      {% for p in products %}
+      <div class="catalog-item">
+        {% if p.image_url %}
+        <img src="{{ p.image_url }}" alt="{{ p.name }}" class="catalog-img">
+        {% else %}
+        <div class="catalog-img-placeholder">{{ p.category[0] if p.category else '?' }}</div>
+        {% endif %}
+        <div class="catalog-item-body">
+          <div class="catalog-item-name">{{ p.name }}</div>
+          {% if p.vid %}<div class="catalog-item-vid">{{ p.vid }}</div>{% endif %}
+          {% if p.description %}<div class="catalog-item-desc">{{ p.description }}</div>{% endif %}
+
+          {% if p.direction %}
+          <div class="catalog-item-dirs">
+            {% for d in p.direction.split(',') if d.strip() %}
+            <span class="catalog-dir-chip">{{ d.strip() }}</span>
+            {% endfor %}
+          </div>
+          {% endif %}
+
+          {% if p.recipe %}
+          <div class="catalog-recipe">
+            <div class="catalog-recipe-title">📋 Retsept:</div>
+            <div class="catalog-recipe-text">{{ p.recipe }}</div>
+          </div>
+          {% endif %}
+
+          <div class="catalog-price">${{ "%.2f"|format(p.price) }}</div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endfor %}
+
+  <!-- Back page -->
+  <div class="catalog-back">
+    <div class="catalog-back-inner">
+      <div class="catalog-logo" style="font-size:3rem">🌿</div>
+      <div style="font-size:1.3rem;font-weight:800;color:#00723F;margin:8px 0">HERBALIFE</div>
+      <div style="font-size:.85rem;color:#666;margin-bottom:24px">Ishonchli Distribyutor</div>
+      <div style="font-size:1rem;font-weight:700;color:#333;margin-bottom:8px">
+        Biz bilan aloqa:
+      </div>
+      <div style="font-size:.88rem;color:#555;line-height:2">
+        📱 Telegram: @herbalife_admin<br>
+        📞 Tel: +998 XX XXX-XX-XX<br>
+        🌐 Web: herbalife.com
+      </div>
+      <div style="margin-top:24px;font-size:.72rem;color:#aaa">
+        © Herbalife International of America, Inc.
+      </div>
+    </div>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block scripts %}
+<style>
+/* Screen styles */
+#catalog-print-area { max-width: 900px; margin: 0 auto; }
+.catalog-cover {
+  background: linear-gradient(135deg, #00723F 0%, #005530 50%, #0d3322 100%);
+  border-radius: 20px;
+  min-height: 400px;
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 24px; text-align: center;
+}
+.catalog-cover-inner { padding: 60px 40px; }
+.catalog-logo { font-size: 5rem; margin-bottom: 12px; }
+.catalog-brand { color: #fff; font-size: 2rem; font-weight: 900; letter-spacing: 8px; }
+.catalog-title { color: rgba(255,255,255,.85); font-size: 1.1rem; font-weight: 600; margin-top: 8px; }
+.catalog-subtitle { color: rgba(255,255,255,.55); font-size: .82rem; margin-top: 4px; }
+.catalog-divider { width: 60px; height: 3px; background: rgba(255,255,255,.3); margin: 20px auto; border-radius: 2px; }
+.catalog-tagline { color: rgba(255,255,255,.6); font-size: .8rem; font-style: italic; }
+
+.catalog-section { margin-bottom: 28px; }
+.catalog-cat-header {
+  background: #00723F; color: #fff;
+  font-size: 1rem; font-weight: 700;
+  padding: 10px 20px; border-radius: 10px;
+  margin-bottom: 14px; letter-spacing: .5px;
+}
+.catalog-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
+.catalog-item {
+  background: #fff; border-radius: 14px;
+  overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,.07);
+  display: flex; gap: 0;
+}
+.catalog-img { width: 120px; height: 120px; object-fit: cover; flex-shrink: 0; }
+.catalog-img-placeholder {
+  width: 120px; height: 120px; background: #e8f5ee;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 2rem; font-weight: 800; color: #00723F; flex-shrink: 0;
+}
+.catalog-item-body { padding: 12px; flex: 1; }
+.catalog-item-name { font-size: .85rem; font-weight: 700; color: #0d2318; margin-bottom: 3px; }
+.catalog-item-vid { font-size: .65rem; font-weight: 600; color: #2e7d32; background: #e8f5ee;
+                    display: inline-block; padding: 1px 7px; border-radius: 8px; margin-bottom: 5px; }
+.catalog-item-desc { font-size: .72rem; color: #666; line-height: 1.45; margin-bottom: 6px; }
+.catalog-item-dirs { display: flex; flex-wrap: wrap; gap: 3px; margin-bottom: 6px; }
+.catalog-dir-chip { font-size: .6rem; background: #e8eaf6; color: #3949ab;
+                    padding: 1px 6px; border-radius: 6px; font-weight: 600; }
+.catalog-recipe { background: #f5faf7; border-left: 3px solid #00723F;
+                  padding: 6px 8px; border-radius: 0 6px 6px 0; margin-bottom: 6px; }
+.catalog-recipe-title { font-size: .62rem; font-weight: 700; color: #00723F; margin-bottom: 3px; }
+.catalog-recipe-text { font-size: .68rem; color: #4a6355; line-height: 1.5; }
+.catalog-price { font-size: .95rem; font-weight: 800; color: #00723F; }
+
+.catalog-back {
+  background: #f8fdf9; border: 2px solid #00723F;
+  border-radius: 20px; text-align: center; padding: 40px;
+  margin-top: 24px;
+}
+.catalog-back-inner { max-width: 300px; margin: 0 auto; }
+
+/* ─── PRINT STYLES ─── */
+@media print {
+  .no-print, .sidebar, .topbar, .main-content > .topbar { display: none !important; }
+  .main-content { margin-left: 0 !important; padding: 0 !important; }
+  .page-body { padding: 0 !important; }
+  body { background: #fff !important; }
+  #catalog-print-area { max-width: 100%; }
+
+  .catalog-cover {
+    background: #00723F !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+    min-height: 100vh;
+    border-radius: 0;
+    page-break-after: always;
+  }
+  .catalog-cat-header {
+    background: #00723F !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  .catalog-item { break-inside: avoid; }
+  .catalog-section { break-inside: avoid; }
+  .catalog-back { break-inside: avoid; }
+  @page { margin: 1cm; size: A4; }
+}
+</style>
+{% endblock %}

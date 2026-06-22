@@ -1,0 +1,214 @@
+{% extends 'base.html' %}
+{% block title %}Mahsulotlar — Herbalife CRM{% endblock %}
+{% block topbar_title %}<i class="bi bi-box-seam-fill me-2 text-success"></i>Mahsulotlar Katalogi{% endblock %}
+
+{% block content %}
+
+<!-- Page header -->
+<div class="d-flex align-items-center justify-content-between mb-4">
+  <div>
+    <h1 class="page-title mb-1">Herbalife Katalogi</h1>
+    <p class="text-muted mb-0" style="font-size:.82rem">
+      {{ products|length }} ta mahsulot
+      {% if direc or vid or cat %}
+      &nbsp;·&nbsp;
+      <a href="{{ url_for('products') }}" class="text-decoration-none text-success fw-600">
+        <i class="bi bi-x-circle me-1"></i>Filtrni tozalash
+      </a>
+      {% endif %}
+    </p>
+  </div>
+  <a href="{{ url_for('product_add') }}" class="btn btn-hl px-4">
+    <i class="bi bi-plus-lg me-2"></i>Yangi mahsulot
+  </a>
+</div>
+
+<!-- ── Filters ──────────────────────────────────────────────────── -->
+<div class="filter-block">
+  <div class="filter-block-title"><i class="bi bi-compass me-1"></i>Yo'nalish bo'yicha filtrlash</div>
+  <div class="filter-pills">
+    <a href="{{ url_for('products', vid=vid, cat=cat) }}"
+       class="filter-pill {% if not direc %}active{% endif %}">
+      🌐 Barchasi
+    </a>
+    {% for name, emoji in directions %}
+    <a href="{{ url_for('products', dir=name, vid=vid, cat=cat) }}"
+       class="filter-pill {% if direc == name %}active{% endif %}">
+      {{ emoji }} {{ name }}
+    </a>
+    {% endfor %}
+  </div>
+</div>
+
+<div class="filter-block">
+  <div class="filter-block-title"><i class="bi bi-funnel me-1"></i>Tur bo'yicha</div>
+  <div class="vid-pill-group">
+    <a href="{{ url_for('products', cat=cat, dir=direc) }}"
+       class="vid-pill {% if not vid %}active{% endif %}">Hammasi</a>
+    {% for v in vidi %}
+    <a href="{{ url_for('products', vid=v, cat=cat, dir=direc) }}"
+       class="vid-pill {% if vid == v %}active{% endif %}">
+      {% if v == 'Шоколадные' %}🍫
+      {% elif v == 'Фруктово-ягодные' %}🍓
+      {% elif v == 'Нейтральные' %}⬜
+      {% elif v == 'Напитки' %}🥤
+      {% elif v == 'Вега' %}🌱
+      {% endif %} {{ v }}
+    </a>
+    {% endfor %}
+  </div>
+</div>
+
+<!-- ── Product grid ──────────────────────────────────────────────── -->
+{% if products %}
+<div class="row g-3">
+  {% for p in products %}
+  <div class="col-sm-6 col-lg-4 col-xl-3">
+    <div class="prod-card">
+
+      <!-- IMAGE or GRADIENT -->
+      <div class="prod-img-wrap" style="position:relative">
+        {% if p.image_url %}
+          <img src="{{ p.image_url }}" alt="{{ p.name }}"
+               onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+          <div class="prod-img-gradient grad-{{ p.category or 'default' }}" style="display:none">
+            {% if p.category == 'Коктейль' %}🥤
+            {% elif p.category == 'Напиток' %}💧
+            {% elif p.category == 'Витамины' %}💊
+            {% elif p.category == 'Красота' %}✨
+            {% elif p.category == 'Добавки' %}🌿
+            {% else %}📦{% endif %}
+          </div>
+        {% else %}
+          <div class="prod-img-gradient grad-{{ p.category or 'default' }}">
+            {% if p.category == 'Коктейль' %}🥤
+            {% elif p.category == 'Напиток' %}💧
+            {% elif p.category == 'Витамины' %}💊
+            {% elif p.category == 'Красота' %}✨
+            {% elif p.category == 'Добавки' %}🌿
+            {% else %}📦{% endif %}
+          </div>
+        {% endif %}
+
+        <!-- Vid ribbon -->
+        {% if p.vid %}
+        <div class="prod-vid-ribbon ribbon-{{ p.vid|replace(' ','-') }}">
+          {% if p.vid == 'Шоколадные' %}🍫
+          {% elif p.vid == 'Фруктово-ягодные' %}🍓
+          {% elif p.vid == 'Нейтральные' %}⬜
+          {% elif p.vid == 'Напитки' %}🥤
+          {% elif p.vid == 'Вега' %}🌱
+          {% endif %}
+          {{ p.vid }}
+        </div>
+        {% endif %}
+
+        <!-- Stock badge -->
+        <div class="prod-stock-badge {% if p.stock > 20 %}stock-ok{% elif p.stock > 0 %}stock-low{% else %}stock-out{% endif %}">
+          {% if p.stock > 20 %}✅ {{ p.stock }}
+          {% elif p.stock > 0 %}⚠️ {{ p.stock }} qoldi
+          {% else %}❌ Tugagan
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- BODY -->
+      <div class="prod-body">
+        <div class="prod-cat-tag">{{ p.category }}</div>
+        <div class="prod-name">{{ p.name }}</div>
+        {% if p.description %}
+        <div class="prod-desc">{{ p.description }}</div>
+        {% endif %}
+
+        <!-- Direction chips -->
+        {% set emoji_map = {
+          'Снижение веса':'⚖️','Правильное питание':'🥗','Здоровый образ жизни':'💚',
+          'Красота':'💄','Анти-стресс':'🧘','Долголетие':'⏳','Детокс':'🌿',
+          'Иммунитет':'🛡️','Пищеварение':'🌱','Энергия':'⚡'
+        } %}
+        {% if p.directions_list() %}
+        <div class="prod-dirs">
+          {% for d in p.directions_list() %}
+          <span class="dir-chip">{{ emoji_map.get(d,'') }} {{ d }}</span>
+          {% endfor %}
+        </div>
+        {% endif %}
+
+        <!-- Price -->
+        <div class="prod-price-row">
+          <div>
+            <div class="prod-price-main">${{ "%.2f"|format(p.price) }}</div>
+            {% if p.cost_price %}
+            <div class="prod-price-cost">Tan narxi: ${{ "%.2f"|format(p.cost_price) }}</div>
+            {% endif %}
+          </div>
+          <div class="text-end">
+            <div class="margin-chip {% if p.profit_margin() >= 30 %}margin-good{% else %}margin-ok{% endif %}">
+              {{ p.profit_margin() }}% margin
+            </div>
+          </div>
+        </div>
+
+        <!-- Sostav & Recipe expandable -->
+        {% if p.sostav or p.recipe %}
+        <div class="prod-expand" id="pe-{{ p.id }}">
+          {% if p.sostav %}
+          <div class="mb-2">
+            <div class="expand-label">🧪 Состав / Tarkib</div>
+            <div class="expand-text">{{ p.sostav }}</div>
+          </div>
+          {% endif %}
+          {% if p.recipe %}
+          <div>
+            <div class="expand-label">📋 Рецепт / Ishlatish</div>
+            <div class="expand-text">{{ p.recipe }}</div>
+          </div>
+          {% endif %}
+        </div>
+        {% endif %}
+
+        <!-- Actions -->
+        <div class="prod-actions">
+          {% if p.sostav or p.recipe %}
+          <button class="btn btn-ghost" onclick="toggleProd({{ p.id }},this)">
+            <i class="bi bi-info-circle me-1"></i>Tarkib
+          </button>
+          {% endif %}
+          <a href="{{ url_for('product_edit', pid=p.id) }}" class="btn btn-hl-outline" style="flex:0">
+            <i class="bi bi-pencil"></i>
+          </a>
+          <form method="post" action="{{ url_for('product_delete', pid=p.id) }}"
+                onsubmit="return confirm('{{ p.name }} o\'chirilsinmi?')" style="flex:0">
+            <button class="btn btn-outline-danger"><i class="bi bi-trash"></i></button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+{% else %}
+<div class="empty-state card-box">
+  <div class="empty-icon">📦</div>
+  <p>Mahsulot topilmadi</p>
+  <a href="{{ url_for('products') }}" class="btn btn-ghost me-2">Filtrni tozalash</a>
+  <a href="{{ url_for('product_add') }}" class="btn btn-hl">Yangi mahsulot</a>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script>
+function toggleProd(id, btn) {
+  const el = document.getElementById('pe-' + id);
+  const open = el.style.display === 'block';
+  el.style.display = open ? 'none' : 'block';
+  btn.innerHTML = open
+    ? '<i class="bi bi-info-circle me-1"></i>Tarkib'
+    : '<i class="bi bi-x-circle me-1"></i>Yopish';
+  btn.classList.toggle('btn-ghost', open);
+  btn.classList.toggle('btn-hl', !open);
+}
+</script>
+{% endblock %}

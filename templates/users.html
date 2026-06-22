@@ -1,0 +1,200 @@
+{% extends 'base.html' %}
+{% block title %}Foydalanuvchilar — Herbalife CRM{% endblock %}
+{% block topbar_title %}<i class="bi bi-people-fill me-2 text-success"></i>Foydalanuvchilar Boshqaruvi{% endblock %}
+
+{% block content %}
+
+<!-- Hero -->
+<div style="background:linear-gradient(135deg,#00723F,#005530);
+            border-radius:20px;padding:28px 32px;margin-bottom:24px;position:relative;overflow:hidden">
+  <div style="position:absolute;right:-30px;top:-30px;width:200px;height:200px;
+              border-radius:50%;background:rgba(255,255,255,.05)"></div>
+  <h2 style="color:#fff;font-weight:800;margin-bottom:4px">👥 Distribyutorlar Ro'yxati</h2>
+  <p style="color:rgba(255,255,255,.7);margin:0;font-size:.88rem">
+    Har bir distribyutor faqat o'z mijozlari va buyurtmalarini ko'radi
+  </p>
+</div>
+
+<div class="row g-4">
+
+  <!-- Add user form -->
+  <div class="col-lg-4">
+    <div class="card-box">
+      <div class="card-box-header">
+        <div class="card-box-title"><i class="bi bi-person-plus-fill text-success"></i>Yangi Distribyutor</div>
+      </div>
+      <div class="card-box-body">
+        <form method="post" action="{{ url_for('user_add') }}">
+          <div class="mb-3">
+            <label class="form-label fw-600">Login *</label>
+            <input type="text" name="username" class="form-control"
+                   placeholder="sarvar_dist" required autocomplete="off">
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-600">To'liq ism</label>
+            <input type="text" name="full_name" class="form-control"
+                   placeholder="Sarvar Karimov">
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-600">Telefon</label>
+            <input type="text" name="phone" class="form-control"
+                   placeholder="+998901234567">
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-600">Tarif</label>
+            <select name="plan" class="form-select">
+              <option value="starter">🌱 Starter</option>
+              <option value="pro">⭐ Pro</option>
+              <option value="team">🚀 Team</option>
+            </select>
+          </div>
+          <div class="mb-4">
+            <label class="form-label fw-600">Parol *</label>
+            <input type="text" name="password" class="form-control"
+                   placeholder="Kamida 6 belgi" required autocomplete="off">
+          </div>
+          <button type="submit" class="btn btn-hl w-100">
+            <i class="bi bi-person-plus me-2"></i>Distribyutor Qo'shish
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Users table -->
+  <div class="col-lg-8">
+    <div class="card-box">
+      <div class="card-box-header">
+        <div class="card-box-title">Barcha Foydalanuvchilar</div>
+        <span style="background:#e8f5ee;color:#2e7d32;font-size:.72rem;font-weight:700;
+                     padding:3px 10px;border-radius:10px">{{ users|length }} ta</span>
+      </div>
+      <div class="table-responsive">
+        <table class="table mb-0">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Login</th>
+              <th>To'liq ism</th>
+              <th>Telefon</th>
+              <th>Tarif</th>
+              <th>Holat</th>
+              <th>Yaratildi</th>
+              <th>Amallar</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for u in users %}
+            <tr style="{% if not u.is_active %}opacity:.55{% endif %}">
+              <td style="font-size:.75rem;color:#888">{{ loop.index }}</td>
+              <td>
+                <div class="d-flex align-items-center gap-2">
+                  <div style="width:32px;height:32px;border-radius:10px;
+                       background:{% if u.is_admin %}linear-gradient(135deg,#00723F,#005530){% else %}linear-gradient(135deg,#1565c0,#0d47a1){% endif %};
+                       display:flex;align-items:center;justify-content:center;
+                       color:#fff;font-size:.75rem;font-weight:800;flex-shrink:0">
+                    {{ u.username[0].upper() }}
+                  </div>
+                  <div>
+                    <div class="fw-700" style="font-size:.84rem">{{ u.username }}</div>
+                    {% if u.is_admin %}
+                    <div style="font-size:.62rem;color:#00723F;font-weight:700">ADMIN</div>
+                    {% endif %}
+                  </div>
+                </div>
+              </td>
+              <td style="font-size:.82rem">{{ u.full_name or '—' }}</td>
+              <td style="font-size:.78rem;color:#6b8a7a">{{ u.phone or '—' }}</td>
+              <td>
+                <span style="font-size:.7rem;font-weight:700;
+                     background:{% if u.plan == 'team' %}#fce4ec;color:#c62828{% elif u.plan == 'pro' %}#fff8e1;color:#f57f17{% else %}#e8f5ee;color:#2e7d32{% endif %};
+                     padding:2px 8px;border-radius:8px">
+                  {{ u.plan_label() }}
+                </span>
+              </td>
+              <td>
+                {% if u.is_active %}
+                <span style="background:#e8f5ee;color:#2e7d32;font-size:.7rem;font-weight:700;
+                             padding:2px 8px;border-radius:8px">Aktiv</span>
+                {% else %}
+                <span style="background:#fce4ec;color:#c62828;font-size:.7rem;font-weight:700;
+                             padding:2px 8px;border-radius:8px">Bloklangan</span>
+                {% endif %}
+              </td>
+              <td style="font-size:.75rem;color:#888">{{ u.created_at.strftime('%d.%m.%Y') }}</td>
+              <td>
+                <div class="d-flex gap-1 flex-wrap">
+                  {% if not u.is_admin %}
+                  <!-- Toggle active -->
+                  <form method="post" action="{{ url_for('user_toggle', uid=u.id) }}" class="d-inline">
+                    <button type="submit" class="btn btn-sm"
+                            style="background:{% if u.is_active %}#fff3e0;color:#e65100{% else %}#e8f5ee;color:#2e7d32{% endif %};
+                                   border:none;border-radius:8px;font-size:.7rem;padding:3px 8px;font-weight:700"
+                            title="{{ 'Bloklash' if u.is_active else 'Faollashtirish' }}">
+                      {% if u.is_active %}<i class="bi bi-pause-circle-fill"></i>{% else %}<i class="bi bi-play-circle-fill"></i>{% endif %}
+                    </button>
+                  </form>
+
+                  <!-- Reset password -->
+                  <button type="button" class="btn btn-sm"
+                          style="background:#e3f2fd;color:#1565c0;border:none;border-radius:8px;font-size:.7rem;padding:3px 8px;font-weight:700"
+                          data-bs-toggle="modal" data-bs-target="#resetModal{{ u.id }}"
+                          title="Parol yangilash">
+                    <i class="bi bi-key-fill"></i>
+                  </button>
+
+                  <!-- Delete -->
+                  <form method="post" action="{{ url_for('user_delete', uid=u.id) }}" class="d-inline"
+                        onsubmit="return confirm('{{ u.username }} o\'chirilsinmi?')">
+                    <button type="submit" class="btn btn-sm"
+                            style="background:#fce4ec;color:#c62828;border:none;border-radius:8px;font-size:.7rem;padding:3px 8px"
+                            title="O'chirish">
+                      <i class="bi bi-trash-fill"></i>
+                    </button>
+                  </form>
+                  {% else %}
+                  <span style="font-size:.7rem;color:#aaa">—</span>
+                  {% endif %}
+                </div>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Reset password modals -->
+{% for u in users %}
+{% if not u.is_admin %}
+<div class="modal fade" id="resetModal{{ u.id }}" tabindex="-1">
+  <div class="modal-dialog modal-sm">
+    <div class="modal-content" style="border-radius:16px;border:none">
+      <div class="modal-header" style="border-bottom:1px solid #e8f0ec">
+        <h6 class="modal-title fw-700">🔑 Parol yangilash</h6>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <p style="font-size:.82rem;color:#555">
+          <strong>{{ u.username }}</strong> uchun yangi parol:
+        </p>
+        <form method="post" action="{{ url_for('user_reset', uid=u.id) }}">
+          <div class="mb-3">
+            <input type="text" name="new_password" class="form-control"
+                   placeholder="Yangi parol" required minlength="6">
+          </div>
+          <button type="submit" class="btn btn-hl w-100 btn-sm">
+            Yangilash
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endif %}
+{% endfor %}
+
+{% endblock %}

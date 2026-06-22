@@ -1,0 +1,302 @@
+{% extends 'base.html' %}
+{% block title %}BMI Kalkulyator — Herbalife CRM{% endblock %}
+{% block topbar_title %}<i class="bi bi-calculator-fill me-2 text-success"></i>BMI & Kalori Kalkulyator{% endblock %}
+
+{% block content %}
+
+<!-- Hero -->
+<div style="background:linear-gradient(135deg,#1a237e,#283593,#0d47a1);
+            border-radius:20px;padding:32px 36px;margin-bottom:28px;position:relative;overflow:hidden">
+  <div style="position:absolute;right:-30px;top:-30px;width:200px;height:200px;
+              border-radius:50%;background:rgba(255,255,255,.05)"></div>
+  <h2 style="color:#fff;font-weight:800;margin-bottom:6px">🧮 BMI & Kaloriya Kalkulyatori</h2>
+  <p style="color:rgba(255,255,255,.7);margin:0;font-size:.9rem">
+    Mijozingizning maqsadli vaznini va kunlik kaloriya ehtiyojini hisoblang
+  </p>
+</div>
+
+<div class="row g-3">
+  <!-- Input form -->
+  <div class="col-lg-5">
+    <div class="card-box">
+      <div class="card-box-header">
+        <div class="card-box-title"><i class="bi bi-person-fill"></i>Ma'lumotlarni kiriting</div>
+      </div>
+      <div class="card-box-body">
+
+        <div class="mb-3">
+          <label class="form-label fw-600">Jins</label>
+          <div class="d-flex gap-2">
+            <button type="button" class="gender-btn active" id="btn-male" onclick="setGender('male')">
+              👨 Erkak
+            </button>
+            <button type="button" class="gender-btn" id="btn-female" onclick="setGender('female')">
+              👩 Ayol
+            </button>
+          </div>
+          <input type="hidden" id="gender" value="male">
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label fw-600">Yosh</label>
+          <div class="input-group">
+            <input type="number" id="age" class="form-control" value="30" min="15" max="80">
+            <span class="input-group-text">yosh</span>
+          </div>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label fw-600">Bo'y</label>
+          <div class="input-group">
+            <input type="number" id="height" class="form-control" value="170" min="140" max="220">
+            <span class="input-group-text">sm</span>
+          </div>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label fw-600">Hozirgi vazn</label>
+          <div class="input-group">
+            <input type="number" id="weight" class="form-control" value="75" min="40" max="200">
+            <span class="input-group-text">kg</span>
+          </div>
+        </div>
+
+        <div class="mb-4">
+          <label class="form-label fw-600">Faollik darajasi</label>
+          <select id="activity" class="form-select">
+            <option value="1.2">🛋 Kam harakatli (stol ishi)</option>
+            <option value="1.375">🚶 Oz faol (haftada 1-3 kun)</option>
+            <option value="1.55" selected>🏃 O'rtacha faol (haftada 3-5 kun)</option>
+            <option value="1.725">💪 Juda faol (haftada 6-7 kun)</option>
+            <option value="1.9">⚡ Sportchi (ikki marta/kun)</option>
+          </select>
+        </div>
+
+        <div class="mb-4">
+          <label class="form-label fw-600">Maqsad</label>
+          <div class="d-flex gap-2 flex-wrap">
+            <button type="button" class="goal-btn active" data-goal="-0.15" onclick="setGoal(this)">
+              🔥 Vazn kamaytirish
+            </button>
+            <button type="button" class="goal-btn" data-goal="0" onclick="setGoal(this)">
+              ⚖️ Vazn saqlash
+            </button>
+            <button type="button" class="goal-btn" data-goal="0.15" onclick="setGoal(this)">
+              💪 Massa olish
+            </button>
+          </div>
+          <input type="hidden" id="goal-adj" value="-0.15">
+        </div>
+
+        <button class="btn btn-hl w-100 py-2" onclick="calculate()">
+          <i class="bi bi-calculator me-2"></i>Hisoblash
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Results -->
+  <div class="col-lg-7">
+    <div id="results-panel" style="display:none">
+
+      <!-- BMI Card -->
+      <div class="card-box mb-3">
+        <div class="card-box-header">
+          <div class="card-box-title"><i class="bi bi-speedometer2"></i>BMI Natijasi</div>
+        </div>
+        <div class="card-box-body">
+          <div class="row align-items-center">
+            <div class="col-4 text-center">
+              <div id="bmi-value" style="font-size:3rem;font-weight:900;color:var(--hl-green)">—</div>
+              <div class="text-muted" style="font-size:.72rem">BMI indeksi</div>
+            </div>
+            <div class="col-8">
+              <div id="bmi-label" class="fw-700 mb-2" style="font-size:1rem"></div>
+              <div class="bmi-scale">
+                <div class="bmi-track">
+                  <div class="bmi-seg" style="background:#42a5f5;flex:1" title="Kam vazn: <18.5"></div>
+                  <div class="bmi-seg" style="background:#66bb6a;flex:1" title="Normal: 18.5-25"></div>
+                  <div class="bmi-seg" style="background:#ffa726;flex:1" title="Ortiqcha: 25-30"></div>
+                  <div class="bmi-seg" style="background:#ef5350;flex:1" title="Semizlik: >30"></div>
+                  <div class="bmi-marker" id="bmi-marker" style="left:50%"></div>
+                </div>
+                <div class="d-flex justify-content-between mt-1" style="font-size:.62rem;color:#888">
+                  <span>16</span><span>18.5</span><span>25</span><span>30</span><span>40</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Stats row -->
+      <div class="row g-3 mb-3">
+        <div class="col-6">
+          <div class="card-box">
+            <div class="card-box-body text-center">
+              <div id="ideal-weight" class="fw-800 text-hl" style="font-size:1.5rem">—</div>
+              <div class="text-muted" style="font-size:.72rem">Ideal vazn (kg)</div>
+            </div>
+          </div>
+        </div>
+        <div class="col-6">
+          <div class="card-box">
+            <div class="card-box-body text-center">
+              <div id="daily-kcal" class="fw-800" style="font-size:1.5rem;color:#e65100">—</div>
+              <div class="text-muted" style="font-size:.72rem">Kunlik kaloriya</div>
+            </div>
+          </div>
+        </div>
+        <div class="col-6">
+          <div class="card-box">
+            <div class="card-box-body text-center">
+              <div id="protein-g" class="fw-800" style="font-size:1.5rem;color:#0288d1">—</div>
+              <div class="text-muted" style="font-size:.72rem">Protein (g/kun)</div>
+            </div>
+          </div>
+        </div>
+        <div class="col-6">
+          <div class="card-box">
+            <div class="card-box-body text-center">
+              <div id="water-l" class="fw-800" style="font-size:1.5rem;color:#00695c">—</div>
+              <div class="text-muted" style="font-size:.72rem">Suv (litr/kun)</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Herbalife recommendation -->
+      <div class="card-box">
+        <div class="card-box-header">
+          <div class="card-box-title"><i class="bi bi-stars" style="color:#f5a623"></i>Herbalife Tavsiyasi</div>
+        </div>
+        <div class="card-box-body">
+          <div id="herbalife-rec"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Empty state before calculation -->
+    <div id="empty-calc" class="card-box" style="height:100%;display:flex;align-items:center;justify-content:center">
+      <div class="text-center py-5">
+        <div style="font-size:4rem;margin-bottom:16px">🧮</div>
+        <div class="fw-700" style="color:#0d2318;margin-bottom:8px">Ma'lumotlarni kiriting</div>
+        <div class="text-muted" style="font-size:.82rem">Chap tomondagi formani to'ldiring va <br>"Hisoblash" tugmasini bosing</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<style>
+.gender-btn,.goal-btn{
+  background:#f0f5f2;border:2px solid transparent;border-radius:12px;
+  padding:8px 18px;font-size:.8rem;font-weight:600;color:#4a6355;cursor:pointer;transition:.2s
+}
+.gender-btn.active,.goal-btn.active{background:#e8f5ee;border-color:var(--hl-green);color:var(--hl-green)}
+.bmi-track{display:flex;height:12px;border-radius:6px;overflow:hidden;position:relative;margin-bottom:4px}
+.bmi-seg{height:100%}
+.bmi-marker{
+  position:absolute;top:-4px;width:4px;height:20px;background:#333;
+  border-radius:2px;transform:translateX(-50%);transition:left .5s
+}
+</style>
+<script>
+let goalAdj = -0.15;
+function setGender(g) {
+  document.getElementById('gender').value = g;
+  document.getElementById('btn-male').classList.toggle('active', g === 'male');
+  document.getElementById('btn-female').classList.toggle('active', g === 'female');
+}
+function setGoal(btn) {
+  document.querySelectorAll('.goal-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  goalAdj = parseFloat(btn.dataset.goal);
+  document.getElementById('goal-adj').value = goalAdj;
+}
+function calculate() {
+  const gender = document.getElementById('gender').value;
+  const age    = parseInt(document.getElementById('age').value) || 30;
+  const h      = parseInt(document.getElementById('height').value) || 170;
+  const w      = parseFloat(document.getElementById('weight').value) || 75;
+  const act    = parseFloat(document.getElementById('activity').value) || 1.55;
+
+  // BMI
+  const bmi = w / ((h/100) ** 2);
+  document.getElementById('bmi-value').textContent = bmi.toFixed(1);
+
+  // BMI label + color
+  let bmiLabel, bmiColor;
+  if (bmi < 18.5)       { bmiLabel = '⬇️ Kam vazn';      bmiColor = '#42a5f5'; }
+  else if (bmi < 25)    { bmiLabel = '✅ Normal vazn';    bmiColor = '#66bb6a'; }
+  else if (bmi < 30)    { bmiLabel = '⚠️ Ortiqcha vazn'; bmiColor = '#ffa726'; }
+  else                  { bmiLabel = '🚨 Semizlik';       bmiColor = '#ef5350'; }
+  document.getElementById('bmi-label').textContent = bmiLabel;
+  document.getElementById('bmi-label').style.color = bmiColor;
+  document.getElementById('bmi-value').style.color = bmiColor;
+
+  // Marker position (16..40 → 0..100%)
+  const pct = Math.min(100, Math.max(0, ((bmi - 16) / 24) * 100));
+  document.getElementById('bmi-marker').style.left = pct + '%';
+
+  // Ideal weight (Broca)
+  const ideal = gender === 'male' ? (h - 100) * 0.9 : (h - 105) * 0.9;
+  document.getElementById('ideal-weight').textContent = ideal.toFixed(1) + ' kg';
+
+  // BMR (Mifflin-St Jeor)
+  const bmr = gender === 'male'
+    ? 10*w + 6.25*h - 5*age + 5
+    : 10*w + 6.25*h - 5*age - 161;
+  const tdee = bmr * act;
+  const targetKcal = Math.round(tdee * (1 + goalAdj));
+  document.getElementById('daily-kcal').textContent = targetKcal + ' kcal';
+
+  // Protein
+  const protein = Math.round(w * 1.6);
+  document.getElementById('protein-g').textContent = protein + ' g';
+
+  // Water
+  const water = (w * 0.033).toFixed(1);
+  document.getElementById('water-l').textContent = water + ' L';
+
+  // Herbalife recommendation
+  const diff = w - ideal;
+  let rec = '';
+  if (diff > 5) {
+    rec = `<div class="mb-3"><strong style="color:var(--hl-green)">Vazn kamaytirish dasturi:</strong></div>
+      <ul style="font-size:.82rem;color:#4a6355;line-height:2">
+        <li>🥤 Formula 1 Коктейль — nonushta va tushlik o'rniga (220 kcal)</li>
+        <li>🔥 Термо Комплит — metabolizmni tezlashtiradi</li>
+        <li>🌿 Алоэ Вера концентрат — ichak tozalash, hazm yaxshilash</li>
+        <li>☕ Чай НРГ — energiya, kaloriya yoqish</li>
+        <li>💊 Formula 2 витамины — kunlik vitaminlar</li>
+      </ul>
+      <div class="alert" style="background:#e8f5ee;border:none;border-left:4px solid var(--hl-green);font-size:.8rem;color:#2e7d32;margin-top:8px">
+        💡 Maqsad: ${Math.abs(diff).toFixed(1)} kg kamaytirish. ${Math.ceil(Math.abs(diff)/0.5)} hafta ichida erishish mumkin.
+      </div>`;
+  } else if (diff < -3) {
+    rec = `<div class="mb-3"><strong style="color:#0288d1">Massa olish dasturi:</strong></div>
+      <ul style="font-size:.82rem;color:#4a6355;line-height:2">
+        <li>🥤 Formula 1 Коктейль — kaloriya qo'shish uchun sut bilan</li>
+        <li>💪 Протеиновый коктейль — mushak massasini oshirish</li>
+        <li>⚡ CR7 Drive — mashg'ulot oldidan energiya</li>
+        <li>🐟 Омега-3 — mushak tiklanishi</li>
+      </ul>`;
+  } else {
+    rec = `<div class="mb-3"><strong style="color:#00695c">Sog'lom hayot dasturi:</strong></div>
+      <ul style="font-size:.82rem;color:#4a6355;line-height:2">
+        <li>🥤 Formula 1 Коктейль — kunlik oziqa balansi</li>
+        <li>💊 Formula 2 витамины — vitaminlar</li>
+        <li>🌿 Алоэ Вера — ichak salomatligi</li>
+        <li>🐟 Омега-3 — yurak salomatligi</li>
+      </ul>`;
+  }
+  document.getElementById('herbalife-rec').innerHTML = rec;
+
+  document.getElementById('results-panel').style.display = 'block';
+  document.getElementById('empty-calc').style.display = 'none';
+}
+</script>
+{% endblock %}

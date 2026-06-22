@@ -1,0 +1,163 @@
+{% extends 'base.html' %}
+{% block title %}Eslatmalar — Herbalife CRM{% endblock %}
+{% block topbar_title %}<i class="bi bi-bell-fill me-2 text-warning"></i>Eslatmalar & WhatsApp{% endblock %}
+
+{% block content %}
+
+<div class="d-flex align-items-center justify-content-between mb-4">
+  <div>
+    <h1 class="page-title mb-1">Eslatmalar</h1>
+    <p class="text-muted mb-0" style="font-size:.82rem">
+      {{ clients|length }} ta mijoz 14+ kun buyurtma bermagan
+    </p>
+  </div>
+</div>
+
+<!-- WhatsApp Templates -->
+<div class="card-box mb-4">
+  <div class="card-box-header">
+    <div class="card-box-title"><i class="bi bi-whatsapp" style="color:#25d366"></i>WhatsApp Shablonlar</div>
+    <span class="text-muted" style="font-size:.75rem">Nusxa oling → WhatsApp-da yuboring</span>
+  </div>
+  <div class="card-box-body">
+    <div class="row g-2">
+      {% for t in templates %}
+      <div class="col-md-6">
+        <div class="wa-template-card" id="tpl-{{ loop.index }}">
+          <div class="wa-tpl-name"><i class="bi bi-chat-text me-1"></i>{{ t.name }}</div>
+          <div class="wa-tpl-text">{{ t.text }}</div>
+          <button class="btn btn-ghost btn-sm mt-2" onclick="copyTemplate('tpl-{{ loop.index }}')">
+            <i class="bi bi-clipboard me-1"></i>Nusxa olish
+          </button>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+
+<!-- Client follow-up list -->
+{% if clients %}
+<div class="card-box">
+  <div class="card-box-header">
+    <div class="card-box-title"><i class="bi bi-person-exclamation text-warning"></i>Follow-up kerak</div>
+  </div>
+  <div class="table-responsive">
+    <table class="table mb-0">
+      <thead>
+        <tr>
+          <th>Mijoz</th>
+          <th>Telefon</th>
+          <th>So'nggi buyurtma</th>
+          <th>O'tgan kun</th>
+          <th>Jami xarid</th>
+          <th>Harakat</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in clients %}
+        {% set c = item.client %}
+        {% set days = item.days_ago %}
+        <tr>
+          <td>
+            <a href="{{ url_for('client_detail', cid=c.id) }}" class="text-decoration-none">
+              <div class="d-flex align-items-center gap-2">
+                <div class="client-avatar" style="width:34px;height:34px;border-radius:10px;font-size:.9rem">
+                  {{ c.full_name[0]|upper }}
+                </div>
+                <div>
+                  <div class="fw-700" style="font-size:.85rem">{{ c.full_name }}</div>
+                  {% if c.goal %}<div class="text-muted" style="font-size:.7rem">🎯 {{ c.goal }}</div>{% endif %}
+                </div>
+              </div>
+            </a>
+          </td>
+          <td>
+            {% if c.phone %}
+            <a href="tel:{{ c.phone }}" class="text-decoration-none fw-600" style="font-size:.82rem">
+              {{ c.phone }}
+            </a>
+            {% else %}
+            <span class="text-muted" style="font-size:.78rem">—</span>
+            {% endif %}
+          </td>
+          <td style="font-size:.78rem;color:#555">
+            {% if item.last_order %}
+              {{ item.last_order.created_at.strftime('%d.%m.%Y') }}<br>
+              <span class="text-muted">#{{ item.last_order.id }}</span>
+            {% else %}
+              <span class="text-muted">Hech qachon</span>
+            {% endif %}
+          </td>
+          <td>
+            <span style="font-size:.8rem;font-weight:700;padding:4px 10px;border-radius:10px;
+                 background:{% if days >= 60 %}#fdecea{% elif days >= 30 %}#fff3e0{% else %}#e8f5ee{% endif %};
+                 color:{% if days >= 60 %}#c62828{% elif days >= 30 %}#e65100{% else %}#2e7d32{% endif %}">
+              {{ days }} kun
+            </span>
+          </td>
+          <td class="fw-700 text-hl">${{ "%.0f"|format(c.total_spent()) }}</td>
+          <td>
+            <div class="d-flex gap-1 flex-wrap">
+              {% if c.phone %}
+              <div class="dropdown">
+                <button class="btn btn-sm" style="background:#25d366;color:#fff;border:none;border-radius:8px;font-size:.72rem;padding:5px 10px"
+                        data-bs-toggle="dropdown">
+                  <i class="bi bi-whatsapp me-1"></i>WhatsApp
+                </button>
+                <ul class="dropdown-menu" style="min-width:200px;font-size:.8rem">
+                  {% for t in templates %}
+                  <li>
+                    <a class="dropdown-item" target="_blank"
+                       href="https://wa.me/{{ c.phone | replace('+','') | replace(' ','') | replace('-','') }}?text={{ (t.text | replace('{name}', c.full_name)) | urlencode }}">
+                      {{ t.name }}
+                    </a>
+                  </li>
+                  {% endfor %}
+                </ul>
+              </div>
+              {% endif %}
+              <a href="{{ url_for('order_add') }}" class="btn btn-ghost btn-sm">
+                <i class="bi bi-bag-plus"></i>
+              </a>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+{% else %}
+<div class="empty-state card-box">
+  <div class="empty-icon">✅</div>
+  <p>Barcha mijozlar aktiv — eslatma kerak emas!</p>
+</div>
+{% endif %}
+
+{% endblock %}
+
+{% block scripts %}
+<style>
+.wa-template-card{
+  background:#f0fdf4;border:1px solid #bbf7d0;border-radius:12px;padding:14px;height:100%
+}
+.wa-tpl-name{font-size:.72rem;font-weight:700;color:#16a34a;margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px}
+.wa-tpl-text{font-size:.8rem;color:#374151;line-height:1.55}
+</style>
+<script>
+function copyTemplate(id) {
+  const text = document.querySelector('#' + id + ' .wa-tpl-text').textContent.trim();
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = document.querySelector('#' + id + ' button');
+    const orig = btn.innerHTML;
+    btn.innerHTML = '<i class="bi bi-check-circle me-1"></i>Nusxalandi!';
+    btn.style.color = '#16a34a';
+    setTimeout(() => { btn.innerHTML = orig; btn.style.color = ''; }, 2000);
+  });
+}
+// Set reminder badge count
+window.REMINDER_COUNT = {{ clients|length }};
+</script>
+{% endblock %}

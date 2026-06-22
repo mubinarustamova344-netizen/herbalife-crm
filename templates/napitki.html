@@ -1,0 +1,298 @@
+{% extends 'base.html' %}
+{% block title %}Kokteylar & Ichimliklar — Herbalife CRM{% endblock %}
+{% block topbar_title %}<i class="bi bi-cup-hot-fill me-2 text-success"></i>Kokteylar & Ichimliklar{% endblock %}
+
+{% block content %}
+
+<!-- Hero banner -->
+<div style="background:linear-gradient(135deg,#00723F 0%,#005530 50%,#0d3322 100%);
+            border-radius:20px;padding:36px 36px 32px;margin-bottom:28px;position:relative;overflow:hidden">
+  <div style="position:absolute;right:-40px;top:-40px;width:240px;height:240px;border-radius:50%;
+              background:rgba(255,255,255,0.05)"></div>
+  <div style="position:absolute;right:60px;bottom:-60px;width:180px;height:180px;border-radius:50%;
+              background:rgba(255,255,255,0.04)"></div>
+  <div class="row align-items-center">
+    <div class="col-lg-8">
+      <div style="font-size:.72rem;letter-spacing:3px;color:rgba(255,255,255,.55);
+                  text-transform:uppercase;margin-bottom:8px">Herbalife Premium</div>
+      <h2 style="color:#fff;font-weight:800;font-size:1.8rem;margin-bottom:10px">
+        🥤 Kokteylar & Ichimliklar
+      </h2>
+      <p style="color:rgba(255,255,255,.72);margin:0;font-size:.9rem">
+        Herbalife Formula 1 retseptlari, ichimliklar va tayyor kokteylar — mijozlarga tavsiya uchun
+      </p>
+    </div>
+    <div class="col-lg-4 text-end d-none d-lg-block">
+      <div style="font-size:5rem;opacity:.25">🌿</div>
+    </div>
+  </div>
+</div>
+
+<!-- Tab nav -->
+<ul class="nav mb-4" id="drinkTabs" style="gap:8px">
+  <li class="nav-item">
+    <button class="drink-tab active" data-tab="all" onclick="switchTab('all',this)">
+      🌐 Barchasi
+    </button>
+  </li>
+  <li class="nav-item">
+    <button class="drink-tab" data-tab="kokteyl" onclick="switchTab('kokteyl',this)">
+      🥛 Formula 1 Kokteylar
+    </button>
+  </li>
+  <li class="nav-item">
+    <button class="drink-tab" data-tab="napitok" onclick="switchTab('napitok',this)">
+      🍃 Ichimliklar
+    </button>
+  </li>
+  <li class="nav-item">
+    <button class="drink-tab" data-tab="retsept" onclick="switchTab('retsept',this)">
+      📖 Maxsus Retseptlar
+    </button>
+  </li>
+</ul>
+
+<!-- ─── FORMULA 1 COCKTAILS ─── -->
+<div class="drink-section" id="sec-kokteyl">
+<h4 class="section-heading"><i class="bi bi-stars me-2" style="color:#f5a623"></i>Formula 1 Kokteylar</h4>
+<div class="row g-3 mb-4">
+
+  {% for p in shakes %}
+  <div class="col-sm-6 col-lg-4 drink-card-wrap" data-cat="kokteyl">
+    <div class="drink-card">
+      <div class="drink-card-img">
+        {% if p.image_url %}
+        <img src="{{ p.image_url }}" alt="{{ p.name }}" style="width:100%;height:100%;object-fit:cover">
+        {% else %}
+        <div class="prod-img-gradient grad-{{ p.category }}" style="height:100%"></div>
+        {% endif %}
+        <div class="drink-kcal-badge">{{ ((p.price / 45) * 220)|int }} kcal</div>
+      </div>
+      <div class="drink-card-body">
+        <div class="d-flex align-items-start justify-content-between mb-2">
+          <div>
+            <div class="drink-name">{{ p.name }}</div>
+            <div class="drink-vid-chip">{{ p.vid }}</div>
+          </div>
+          <div class="drink-price">${{ "%.0f"|format(p.price) }}</div>
+        </div>
+
+        {% if p.description %}
+        <p class="drink-desc">{{ p.description }}</p>
+        {% endif %}
+
+        <!-- Nutrition badges -->
+        <div class="d-flex flex-wrap gap-1 mb-3">
+          <span class="nutr-badge green">🥩 17g protein</span>
+          <span class="nutr-badge blue">🌾 9g uglevod</span>
+          <span class="nutr-badge orange">25 vitamin</span>
+        </div>
+
+        <!-- Directions -->
+        {% if p.direction %}
+        <div class="mb-3">
+          {% for d in p.direction.split(',') if d.strip() %}
+          <span class="dir-chip-sm">{{ d.strip() }}</span>
+          {% endfor %}
+        </div>
+        {% endif %}
+
+        <!-- Recipe -->
+        {% if p.recipe %}
+        <div class="drink-recipe-box">
+          <div class="drink-recipe-title"><i class="bi bi-journal-text me-1"></i>Retsept</div>
+          <p style="margin:0;font-size:.78rem;color:#4a6355;line-height:1.55">{{ p.recipe }}</p>
+        </div>
+        {% endif %}
+
+        <!-- Sostav toggle -->
+        {% if p.sostav %}
+        <button class="btn btn-ghost btn-sm mt-2 w-100" onclick="toggleSostav(this)"
+                data-sostav="{{ p.sostav }}">
+          <i class="bi bi-list-ul me-1"></i>Tarkib ko'rish
+        </button>
+        <div class="sostav-box" style="display:none">{{ p.sostav }}</div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+  {% else %}
+  <div class="col-12">
+    <div class="empty-state card-box"><div class="empty-icon">🥛</div><p>Kokteylar topilmadi</p></div>
+  </div>
+  {% endfor %}
+
+</div>
+</div>
+
+<!-- ─── DRINKS ─── -->
+<div class="drink-section" id="sec-napitok">
+<h4 class="section-heading"><i class="bi bi-droplet-fill me-2" style="color:#0288d1"></i>Ichimliklar</h4>
+<div class="row g-3 mb-4">
+
+  {% for p in drinks %}
+  <div class="col-sm-6 col-lg-3 drink-card-wrap" data-cat="napitok">
+    <div class="drink-card">
+      <div class="drink-card-img" style="height:180px">
+        {% if p.image_url %}
+        <img src="{{ p.image_url }}" alt="{{ p.name }}" style="width:100%;height:100%;object-fit:cover">
+        {% else %}
+        <div class="prod-img-gradient grad-{{ p.category }}" style="height:100%"></div>
+        {% endif %}
+      </div>
+      <div class="drink-card-body">
+        <div class="drink-name mb-1">{{ p.name }}</div>
+        <div class="drink-vid-chip mb-2">{{ p.vid }}</div>
+        {% if p.description %}<p class="drink-desc">{{ p.description }}</p>{% endif %}
+        {% if p.recipe %}
+        <div class="drink-recipe-box">
+          <div class="drink-recipe-title"><i class="bi bi-journal-text me-1"></i>Tayyorlash</div>
+          <p style="margin:0;font-size:.78rem;color:#4a6355;line-height:1.55">{{ p.recipe }}</p>
+        </div>
+        {% endif %}
+        <div class="d-flex justify-content-between align-items-center mt-3">
+          <span class="nutr-badge green">{{ p.category }}</span>
+          <span class="drink-price">${{ "%.0f"|format(p.price) }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% else %}
+  <div class="col-12">
+    <div class="empty-state card-box"><div class="empty-icon">🍵</div><p>Ichimliklar topilmadi</p></div>
+  </div>
+  {% endfor %}
+
+</div>
+</div>
+
+<!-- ─── SPECIAL RECIPES ─── -->
+<div class="drink-section" id="sec-retsept">
+<h4 class="section-heading"><i class="bi bi-magic me-2" style="color:#8e24aa"></i>Maxsus Retseptlar</h4>
+<div class="row g-3">
+
+  {% for r in special_recipes %}
+  <div class="col-md-6 col-lg-4 drink-card-wrap" data-cat="retsept">
+    <div class="drink-card" style="border-top:3px solid {{ r.color }}">
+      <div class="drink-card-body">
+        <div style="font-size:2.5rem;margin-bottom:8px">{{ r.emoji }}</div>
+        <div class="drink-name mb-1">{{ r.name }}</div>
+        <div class="drink-vid-chip mb-3" style="background:{{ r.color }}22;color:{{ r.color }}">
+          {{ r.goal }}
+        </div>
+
+        <!-- Ingredients -->
+        <div class="drink-recipe-title mb-2"><i class="bi bi-basket me-1"></i>Ingredientlar</div>
+        <ul style="margin:0 0 12px;padding-left:16px;font-size:.8rem;color:#4a6355">
+          {% for ing in r.ingredients %}
+          <li style="margin-bottom:3px">{{ ing }}</li>
+          {% endfor %}
+        </ul>
+
+        <!-- Steps -->
+        <div class="drink-recipe-title mb-2"><i class="bi bi-list-ol me-1"></i>Tayyorlash</div>
+        <ol style="margin:0 0 12px;padding-left:16px;font-size:.78rem;color:#4a6355">
+          {% for step in r.steps %}
+          <li style="margin-bottom:4px">{{ step }}</li>
+          {% endfor %}
+        </ol>
+
+        <!-- Nutrition facts -->
+        <div class="nutr-facts-row">
+          {% for k,v in r.nutrition.items() %}
+          <div class="nutr-fact">
+            <div class="nutr-val">{{ v }}</div>
+            <div class="nutr-key">{{ k }}</div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+
+</div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<style>
+.drink-tab{
+  background:#f0f5f2;border:none;border-radius:20px;padding:8px 18px;
+  font-size:.8rem;font-weight:600;color:#4a6355;cursor:pointer;transition:.2s
+}
+.drink-tab.active,.drink-tab:hover{background:var(--hl-green);color:#fff}
+
+.section-heading{
+  font-size:1rem;font-weight:700;color:#0d2318;margin-bottom:16px;
+  padding-bottom:10px;border-bottom:2px solid #e8f0ec
+}
+.drink-card{
+  background:#fff;border-radius:16px;overflow:hidden;
+  box-shadow:0 2px 12px rgba(0,0,0,.07);height:100%;
+  transition:transform .2s,box-shadow .2s
+}
+.drink-card:hover{transform:translateY(-4px);box-shadow:0 8px 28px rgba(0,114,63,.13)}
+.drink-card-img{height:220px;overflow:hidden;position:relative;background:#f0f5f2}
+.drink-kcal-badge{
+  position:absolute;top:10px;right:10px;background:rgba(0,0,0,.55);
+  color:#fff;font-size:.7rem;font-weight:700;padding:4px 10px;border-radius:20px;
+  backdrop-filter:blur(4px)
+}
+.drink-card-body{padding:16px}
+.drink-name{font-size:.92rem;font-weight:700;color:#0d2318;margin-bottom:4px}
+.drink-desc{font-size:.76rem;color:#6b8a7a;margin-bottom:10px;line-height:1.5}
+.drink-price{font-size:1rem;font-weight:800;color:var(--hl-green)}
+.drink-vid-chip{
+  display:inline-block;font-size:.68rem;font-weight:600;
+  background:#e8f5ee;color:#2e7d32;padding:2px 9px;border-radius:10px;margin-bottom:6px
+}
+.drink-recipe-box{
+  background:#f5faf7;border-radius:10px;padding:10px 12px;margin-top:8px;
+  border-left:3px solid var(--hl-green)
+}
+.drink-recipe-title{font-size:.72rem;font-weight:700;color:#00723F;margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px}
+.nutr-badge{display:inline-block;font-size:.68rem;font-weight:600;padding:3px 8px;border-radius:8px}
+.nutr-badge.green{background:#e8f5ee;color:#2e7d32}
+.nutr-badge.blue{background:#e3f2fd;color:#0d47a1}
+.nutr-badge.orange{background:#fff3e0;color:#e65100}
+.dir-chip-sm{
+  display:inline-block;font-size:.65rem;font-weight:600;
+  background:#e8eaf6;color:#3949ab;padding:2px 7px;border-radius:8px;margin:1px
+}
+.sostav-box{
+  background:#f9fbf9;border:1px solid #e0eae4;border-radius:8px;
+  padding:10px;margin-top:8px;font-size:.75rem;color:#4a6355;line-height:1.6
+}
+.nutr-facts-row{
+  display:flex;gap:0;border:1px solid #e8f0ec;border-radius:10px;overflow:hidden;
+  text-align:center
+}
+.nutr-fact{flex:1;padding:8px 4px;border-right:1px solid #e8f0ec}
+.nutr-fact:last-child{border-right:none}
+.nutr-val{font-size:.88rem;font-weight:800;color:#00723F}
+.nutr-key{font-size:.6rem;color:#6b8a7a;text-transform:uppercase;letter-spacing:.3px}
+</style>
+<script>
+function switchTab(tab, btn) {
+  document.querySelectorAll('.drink-tab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  const secs = {'all':['kokteyl','napitok','retsept'],'kokteyl':['kokteyl'],'napitok':['napitok'],'retsept':['retsept']};
+  ['kokteyl','napitok','retsept'].forEach(s => {
+    const el = document.getElementById('sec-' + s);
+    if (el) el.style.display = secs[tab].includes(s) ? '' : 'none';
+  });
+}
+function toggleSostav(btn) {
+  const box = btn.nextElementSibling;
+  if (box.style.display === 'none') {
+    box.style.display = 'block';
+    btn.innerHTML = '<i class="bi bi-x me-1"></i>Yopish';
+  } else {
+    box.style.display = 'none';
+    btn.innerHTML = '<i class="bi bi-list-ul me-1"></i>Tarkib ko\'rish';
+  }
+}
+</script>
+{% endblock %}

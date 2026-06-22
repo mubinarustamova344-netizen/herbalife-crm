@@ -1,0 +1,240 @@
+{% extends 'base.html' %}
+{% block title %}21-kun Marafon — Herbalife CRM{% endblock %}
+{% block topbar_title %}<i class="bi bi-trophy-fill me-2" style="color:#f5a623"></i>21-kun Marafon Challenge{% endblock %}
+
+{% block content %}
+
+<!-- Hero -->
+<div style="background:linear-gradient(135deg,#b71c1c,#880e4f,#4a148c);
+            border-radius:20px;padding:32px 36px;margin-bottom:28px;position:relative;overflow:hidden">
+  <div style="position:absolute;right:-20px;top:-20px;width:180px;height:180px;
+              border-radius:50%;background:rgba(255,255,255,.05)"></div>
+  <h2 style="color:#fff;font-weight:800;margin-bottom:6px">🏆 21-kun Vazn Kamaytirish Marafoni</h2>
+  <p style="color:rgba(255,255,255,.7);margin:0;font-size:.88rem">
+    Mijozlaringizni challenge-ga jalb qiling, natijalarni kuzating va g'olibni mukofotlang
+  </p>
+</div>
+
+<div class="row g-3">
+  <!-- Create new challenge -->
+  <div class="col-lg-4">
+    <div class="card-box mb-3">
+      <div class="card-box-header">
+        <div class="card-box-title"><i class="bi bi-plus-circle-fill text-success"></i>Yangi Marafon</div>
+      </div>
+      <div class="card-box-body">
+        <form method="post" action="{{ url_for('challenge_add') }}">
+          <div class="mb-3">
+            <label class="form-label fw-600">Marafon nomi *</label>
+            <input type="text" name="name" class="form-control"
+                   placeholder="21-kun Ozish Marafoni #1" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-600">Boshlanish sanasi *</label>
+            <input type="date" name="start_date" class="form-control"
+                   value="{{ now.strftime('%Y-%m-%d') }}" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-600">Davomiyligi (kun)</label>
+            <select name="duration_days" class="form-select">
+              <option value="7">7 kun</option>
+              <option value="14">14 kun</option>
+              <option value="21" selected>21 kun</option>
+              <option value="30">30 kun</option>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-600">Sovrin (ixtiyoriy)</label>
+            <input type="text" name="prize" class="form-control"
+                   placeholder="Masalan: Herbalife mahsulot seti">
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-600">Tavsif</label>
+            <textarea name="description" class="form-control" rows="2"
+                      placeholder="Marafon haqida qisqacha..."></textarea>
+          </div>
+          <button type="submit" class="btn btn-hl w-100">
+            <i class="bi bi-flag-fill me-2"></i>Marafon Yaratish
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Add participant -->
+    {% if challenges %}
+    <div class="card-box">
+      <div class="card-box-header">
+        <div class="card-box-title"><i class="bi bi-person-plus-fill"></i>Ishtirokchi Qo'shish</div>
+      </div>
+      <div class="card-box-body">
+        <form method="post" action="{{ url_for('challenge_join', cid=challenges[0].id) }}">
+          <div class="mb-3">
+            <label class="form-label fw-600">Marafon</label>
+            <select name="challenge_id" class="form-select" id="join-challenge-id"
+                    onchange="this.form.action='/challenge/'+this.value+'/join'">
+              {% for ch in challenges %}
+              <option value="{{ ch.id }}">{{ ch.name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-600">Mijoz</label>
+            <select name="client_id" class="form-select" required>
+              <option value="">— tanlang —</option>
+              {% for c in all_clients %}
+              <option value="{{ c.id }}">{{ c.full_name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-600">Boshlang'ich vazn (kg)</label>
+            <input type="number" name="start_weight" class="form-control"
+                   step="0.1" placeholder="75.0">
+          </div>
+          <button type="submit" class="btn btn-hl-outline w-100">
+            <i class="bi bi-person-plus me-1"></i>Qo'shish
+          </button>
+        </form>
+      </div>
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- Challenges list -->
+  <div class="col-lg-8">
+    {% if challenges %}
+    {% for ch in challenges %}
+    <div class="card-box mb-3">
+      <div class="card-box-header">
+        <div>
+          <div class="card-box-title">
+            🏆 {{ ch.name }}
+            {% if ch.is_active() %}
+            <span style="background:#e8f5ee;color:#2e7d32;font-size:.65rem;font-weight:700;
+                         padding:2px 8px;border-radius:10px;margin-left:8px">AKTIV</span>
+            {% else %}
+            <span style="background:#f5f5f5;color:#999;font-size:.65rem;font-weight:700;
+                         padding:2px 8px;border-radius:10px;margin-left:8px">TUGAGAN</span>
+            {% endif %}
+          </div>
+          <div style="font-size:.72rem;color:#6b8a7a;margin-top:2px">
+            📅 {{ ch.start_date.strftime('%d.%m.%Y') }} —
+            {{ ch.duration_days }} kun •
+            {% if ch.is_active() %}⏳ {{ ch.days_left() }} kun qoldi{% else %}Tugadi{% endif %}
+            {% if ch.prize %} • 🎁 {{ ch.prize }}{% endif %}
+          </div>
+        </div>
+        <form method="post" action="{{ url_for('challenge_delete', cid=ch.id) }}"
+              onsubmit="return confirm('Marafon o\'chirilsinmi?')" class="ms-2">
+          <button type="submit" class="btn btn-outline-danger btn-sm">
+            <i class="bi bi-trash"></i>
+          </button>
+        </form>
+      </div>
+
+      {% if ch.participants %}
+      <!-- Leaderboard -->
+      <div class="table-responsive">
+        <table class="table mb-0">
+          <thead>
+            <tr>
+              <th style="width:40px">#</th>
+              <th>Ishtirokchi</th>
+              <th>Boshlang'ich</th>
+              <th>Hozirgi</th>
+              <th>Yo'qotildi</th>
+              <th>Yangilash</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% set sorted_parts = ch.participants | sort(attribute='lost_kg', reverse=True) %}
+            {% for p in sorted_parts %}
+            <tr>
+              <td>
+                <div style="width:26px;height:26px;border-radius:8px;display:flex;
+                     align-items:center;justify-content:center;font-size:.7rem;font-weight:800;
+                     background:{% if loop.index == 1 %}#f5a623{% elif loop.index == 2 %}#9e9e9e{% elif loop.index == 3 %}#a0522d{% else %}#e8f0ec{% endif %};
+                     color:{% if loop.index <= 3 %}#fff{% else %}#4a6355{% endif %}">
+                  {{ loop.index }}
+                </div>
+              </td>
+              <td>
+                <a href="{{ url_for('client_detail', cid=p.client.id) }}"
+                   class="fw-700 text-decoration-none" style="font-size:.84rem">
+                  {{ p.client.full_name }}
+                </a>
+              </td>
+              <td style="font-size:.82rem">{{ p.start_weight or '—' }} kg</td>
+              <td style="font-size:.82rem">{{ p.current_weight or '—' }} kg</td>
+              <td>
+                {% set lost = p.lost_kg() %}
+                <span style="font-weight:800;font-size:.9rem;
+                     color:{% if lost > 0 %}#2e7d32{% elif lost < 0 %}#c62828{% else %}#555{% endif %}">
+                  {% if lost != 0 %}{{ '%+.1f'|format(lost) }} kg{% else %}—{% endif %}
+                </span>
+              </td>
+              <td>
+                <form method="post" action="{{ url_for('challenge_update', cid=ch.id, pid=p.id) }}"
+                      class="d-flex gap-1 align-items-center">
+                  <input type="number" name="current_weight" step="0.1"
+                         value="{{ p.current_weight or '' }}"
+                         class="form-control form-control-sm" style="width:80px">
+                  <button type="submit" class="btn btn-ghost btn-sm">
+                    <i class="bi bi-check-circle-fill text-success"></i>
+                  </button>
+                </form>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Progress bars -->
+      <div style="padding:12px 16px;background:#f8fdf9;border-top:1px solid #e8f0ec">
+        <div class="fw-600" style="font-size:.75rem;color:#4a6355;margin-bottom:8px">Natijalar Ko'rsatgichi</div>
+        {% for p in sorted_parts %}
+        {% set lost = p.lost_kg() %}
+        {% if lost > 0 and p.start_weight %}
+        {% set pct = [(lost / (p.start_weight * 0.1) * 100)|round|int, 100]|min %}
+        <div class="mb-2">
+          <div class="d-flex justify-content-between mb-1" style="font-size:.72rem">
+            <span class="fw-600">{{ p.client.full_name }}</span>
+            <span class="text-hl fw-700">-{{ lost }} kg ({{ pct }}%)</span>
+          </div>
+          <div style="height:6px;background:#e0eae4;border-radius:3px;overflow:hidden">
+            <div style="height:100%;width:{{ pct }}%;background:linear-gradient(90deg,#00723F,#69f0ae);border-radius:3px"></div>
+          </div>
+        </div>
+        {% endif %}
+        {% endfor %}
+      </div>
+
+      {% else %}
+      <div class="card-box-body">
+        <div class="text-center py-3 text-muted" style="font-size:.82rem">
+          Hali ishtirokchi yo'q. Chapdan mijoz qo'shing.
+        </div>
+      </div>
+      {% endif %}
+    </div>
+    {% endfor %}
+
+    {% else %}
+    <div class="empty-state card-box" style="height:300px">
+      <div class="empty-icon">🏆</div>
+      <p>Hali marafon yaratilmagan</p>
+      <p class="text-muted" style="font-size:.8rem">Chapdan yangi marafon yarating</p>
+    </div>
+    {% endif %}
+  </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+const now = new Date().toISOString().split('T')[0];
+document.querySelector('input[name="start_date"]').value = now;
+</script>
+{% endblock %}

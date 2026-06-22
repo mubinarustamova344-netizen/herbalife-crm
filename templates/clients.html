@@ -1,0 +1,92 @@
+{% extends 'base.html' %}
+{% block title %}Mijozlar — Herbalife CRM{% endblock %}
+{% block topbar_title %}<i class="bi bi-people-fill me-2 text-success"></i>Mijozlar{% endblock %}
+
+{% block content %}
+<div class="d-flex align-items-center justify-content-between mb-4">
+  <div>
+    <h1 class="page-title mb-1">Mijozlar bazasi</h1>
+    <p class="text-muted mb-0" style="font-size:.82rem">{{ clients|length }} ta mijoz topildi</p>
+  </div>
+  <a href="{{ url_for('client_add') }}" class="btn btn-hl px-4">
+    <i class="bi bi-person-plus me-2"></i>Yangi mijoz
+  </a>
+</div>
+
+<!-- Search -->
+<form class="mb-4 d-flex gap-2" method="get" style="max-width:420px">
+  <div class="input-group">
+    <span class="input-group-text" style="background:#fff;border:1.5px solid #d8e8dc;border-right:none;border-radius:10px 0 0 10px">
+      <i class="bi bi-search text-muted"></i>
+    </span>
+    <input name="q" value="{{ q }}" class="form-control"
+           placeholder="Ism yoki telefon raqam..."
+           style="border-left:none;border-radius:0 10px 10px 0">
+  </div>
+  {% if q %}
+  <a href="{{ url_for('clients') }}" class="btn btn-ghost px-3">
+    <i class="bi bi-x-lg"></i>
+  </a>
+  {% endif %}
+</form>
+
+{% if clients %}
+<div class="row g-3">
+  {% for c in clients %}
+  <div class="col-sm-6 col-lg-4 col-xl-3">
+    <a href="{{ url_for('client_detail', cid=c.id) }}" class="client-card">
+      <div class="d-flex align-items-center gap-3 mb-3">
+        <div class="client-avatar">{{ c.full_name[0]|upper }}</div>
+        <div>
+          <div class="fw-700" style="font-size:.93rem;color:#0d2318">{{ c.full_name }}</div>
+          <div class="text-muted" style="font-size:.75rem">
+            <i class="bi bi-telephone me-1"></i>{{ c.phone or '—' }}
+          </div>
+        </div>
+      </div>
+
+      {% if c.goal %}
+      <div class="d-flex align-items-center gap-2 mb-2" style="font-size:.76rem;color:#7a9a80">
+        <i class="bi bi-bullseye text-success"></i> {{ c.goal }}
+      </div>
+      {% endif %}
+
+      {% if c.weight_start and c.weight_now %}
+      {% set diff = c.weight_now - c.weight_start %}
+      <div class="mb-2" style="font-size:.74rem">
+        <div class="d-flex justify-content-between text-muted mb-1">
+          <span>Vazn: {{ c.weight_start }}kg → {{ c.weight_now }}kg</span>
+          <span class="{% if diff < 0 %}text-success{% else %}text-danger{% endif %} fw-700">
+            {{ "%+.1f"|format(diff) }}kg
+          </span>
+        </div>
+        <div class="weight-progress">
+          {% set pct = [[100 - (diff / c.weight_start * 100)|abs|round|int, 0]|max, 100]|min %}
+          <div class="weight-progress-fill {% if diff >= 0 %}bg-danger{% endif %}"
+               style="width:{{ pct }}%;{% if diff >= 0 %}background:#ef5350!important{% endif %}"></div>
+        </div>
+      </div>
+      {% endif %}
+
+      <div class="d-flex justify-content-between align-items-center pt-2"
+           style="border-top:1px solid #f0f5f2;margin-top:4px">
+        <span class="text-muted" style="font-size:.74rem">
+          <i class="bi bi-bag me-1"></i>{{ c.orders|length }} buyurtma
+        </span>
+        <span class="fw-700 text-hl" style="font-size:.88rem">${{ "%.0f"|format(c.total_spent()) }}</span>
+      </div>
+    </a>
+  </div>
+  {% endfor %}
+</div>
+
+{% else %}
+<div class="empty-state card-box">
+  <div class="empty-icon">👥</div>
+  <p>{% if q %}«{{ q }}» bo'yicha mijoz topilmadi{% else %}Hali mijoz yo'q{% endif %}</p>
+  <a href="{{ url_for('client_add') }}" class="btn btn-hl">
+    <i class="bi bi-person-plus me-2"></i>Birinchi mijozni qo'shish
+  </a>
+</div>
+{% endif %}
+{% endblock %}
