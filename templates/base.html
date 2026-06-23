@@ -107,7 +107,25 @@
         {% block topbar_title %}Herbalife CRM{% endblock %}
       </div>
     </div>
+
+    <!-- Global Search -->
+    <div class="topbar-search-wrap" id="searchWrap">
+      <div class="topbar-search-box" onclick="document.getElementById('globalSearch').focus()">
+        <i class="bi bi-search text-muted" style="font-size:.85rem"></i>
+        <input type="text" id="globalSearch" placeholder="Qidirish… (Ctrl+K)"
+               autocomplete="off" oninput="doSearch(this.value)" onblur="closeSearchDelay()">
+        <kbd class="search-kbd">⌘K</kbd>
+      </div>
+      <div class="search-dropdown" id="searchDropdown"></div>
+    </div>
+
     <div class="topbar-right">
+      <!-- Notifications bell -->
+      <a href="{{ url_for('reminders') }}" class="topbar-icon-btn" title="Eslatmalar">
+        <i class="bi bi-bell-fill"></i>
+        <span class="topbar-notif-dot" id="notifDot" style="display:none"></span>
+      </a>
+      <!-- User -->
       <div class="topbar-user">
         <div class="topbar-avatar">{{ current_user.username[0].upper() }}</div>
         <div>
@@ -132,10 +150,13 @@
     {% endfor %}
   {% endwith %}
 
-  <div class="page-body">
+  <div class="page-body page-fade">
     {% block content %}{% endblock %}
   </div>
 </div>
+
+<!-- Toast container -->
+<div id="toastContainer" style="position:fixed;bottom:24px;right:24px;z-index:9999;display:flex;flex-direction:column;gap:10px"></div>
 
 {% else %}
   {% block auth_content %}{% endblock %}
@@ -148,6 +169,60 @@
 if (typeof window.REMINDER_COUNT !== 'undefined' && window.REMINDER_COUNT > 0) {
   const badge = document.getElementById('reminder-badge');
   if (badge) { badge.textContent = window.REMINDER_COUNT; badge.classList.add('visible'); }
+  const dot = document.getElementById('notifDot');
+  if (dot) dot.style.display = 'block';
+}
+
+/* ── Global search ── */
+let _searchTimer;
+function doSearch(q) {
+  clearTimeout(_searchTimer);
+  const dd = document.getElementById('searchDropdown');
+  if (!q.trim()) { dd.innerHTML = ''; dd.classList.remove('open'); return; }
+  _searchTimer = setTimeout(async () => {
+    const res = await fetch('/api/search?q=' + encodeURIComponent(q));
+    const data = await res.json();
+    if (!data.results.length) {
+      dd.innerHTML = '<div class="search-empty">Hech narsa topilmadi</div>';
+    } else {
+      dd.innerHTML = data.results.map(r => `
+        <a href="${r.url}" class="search-item">
+          <span class="search-item-icon">${r.icon}</span>
+          <span class="search-item-label">${r.label}</span>
+          <span class="search-item-type">${r.type}</span>
+        </a>`).join('');
+    }
+    dd.classList.add('open');
+  }, 220);
+}
+function closeSearchDelay() {
+  setTimeout(() => {
+    const dd = document.getElementById('searchDropdown');
+    dd.classList.remove('open');
+  }, 200);
+}
+document.addEventListener('keydown', e => {
+  if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+    e.preventDefault();
+    document.getElementById('globalSearch').focus();
+  }
+  if (e.key === 'Escape') {
+    document.getElementById('globalSearch').blur();
+    document.getElementById('searchDropdown').classList.remove('open');
+  }
+});
+
+/* ── Toast helper ── */
+function showToast(msg, type = 'success') {
+  const icons = { success: '✅', error: '❌', warning: '⚠️', info: 'ℹ️' };
+  const colors = { success: '#00723F', error: '#d32f2f', warning: '#f57c00', info: '#0288d1' };
+  const t = document.createElement('div');
+  t.className = 'app-toast';
+  t.style.borderLeftColor = colors[type] || colors.info;
+  t.innerHTML = `<span style="font-size:1.1rem">${icons[type]||'ℹ️'}</span><span>${msg}</span>`;
+  document.getElementById('toastContainer').appendChild(t);
+  requestAnimationFrame(() => t.classList.add('show'));
+  setTimeout(() => { t.classList.remove('show'); setTimeout(() => t.remove(), 350); }, 3500);
 }
 </script>
 </body>

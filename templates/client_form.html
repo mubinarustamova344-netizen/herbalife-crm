@@ -52,6 +52,13 @@
         <input name="address" class="form-control"
                value="{{ client.address if client else '' }}" placeholder="Shahar, ko'cha">
       </div>
+      <div class="col-md-6">
+        <label class="form-label">
+          <i class="bi bi-balloon-heart text-danger me-1"></i>Tug'ilgan kun
+        </label>
+        <input name="birthday" class="form-control" type="date"
+               value="{{ client.birthday.strftime('%Y-%m-%d') if client and client.birthday else '' }}">
+      </div>
       <div class="col-12">
         <label class="form-label">Maqsad / Yo'nalish</label>
         <input name="goal" class="form-control" list="goals-list"

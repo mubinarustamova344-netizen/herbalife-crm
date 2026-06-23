@@ -602,3 +602,152 @@ textarea.form-control { resize: vertical; min-height: 80px; }
 }
 .empty-state .empty-icon { font-size: 3.5rem; opacity: .35; margin-bottom: 12px; }
 .empty-state p { font-size: .88rem; margin-bottom: 16px; }
+
+/* ═══════════════════════════════════════════════════════════════
+   IMAGE UPLOAD FORM
+═══════════════════════════════════════════════════════════════ */
+.img-preview-box {
+  width: 180px; height: 180px; margin: 0 auto;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #00723F 0%, #00b860 100%);
+  display: flex; align-items: center; justify-content: center;
+  overflow: hidden;
+  border: 3px solid #c8e6d4;
+  box-shadow: 0 6px 20px rgba(0,114,63,.18);
+  transition: box-shadow .2s;
+}
+.img-preview-box:hover { box-shadow: 0 8px 28px rgba(0,114,63,.28); }
+.img-preview-emoji { font-size: 4rem; line-height: 1; }
+
+.img-tip-box {
+  background: #fffbea; border: 1.5px solid #ffe08a;
+  border-radius: 10px; padding: 10px 14px;
+  font-size: .78rem; color: #7a5c00; line-height: 1.5;
+}
+
+.img-preset-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(72px, 1fr));
+  gap: 8px;
+}
+.img-preset-btn {
+  display: flex; flex-direction: column; align-items: center;
+  justify-content: center; gap: 3px;
+  padding: 10px 6px; border-radius: 12px;
+  border: 1.5px solid #d8e8dc; background: #f5faf7;
+  cursor: pointer; transition: all .18s;
+  min-height: 68px;
+}
+.img-preset-btn:hover {
+  border-color: var(--hl-green);
+  background: #e8f5ee;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,114,63,.15);
+}
+.img-preset-btn.active {
+  border-color: var(--hl-green);
+  background: linear-gradient(135deg,#e8f5ee,#d0eedd);
+  box-shadow: 0 0 0 3px rgba(0,114,63,.18);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   PAGE ANIMATION
+═══════════════════════════════════════════════════════════════ */
+@keyframes pageFadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.page-fade { animation: pageFadeIn .32s ease both; }
+
+/* ═══════════════════════════════════════════════════════════════
+   TOPBAR SEARCH
+═══════════════════════════════════════════════════════════════ */
+.topbar-search-wrap {
+  flex: 1; max-width: 380px; margin: 0 20px; position: relative;
+}
+.topbar-search-box {
+  display: flex; align-items: center; gap: 8px;
+  background: #f5f8f6; border: 1.5px solid #e0eae4;
+  border-radius: 12px; padding: 7px 12px; cursor: text;
+  transition: border-color .18s, box-shadow .18s;
+}
+.topbar-search-box:focus-within {
+  border-color: var(--hl-green);
+  box-shadow: 0 0 0 3px rgba(0,114,63,.1);
+  background: #fff;
+}
+.topbar-search-box input {
+  border: none; background: transparent; outline: none;
+  font-size: .82rem; flex: 1; font-family: inherit; color: #1a2e1e;
+}
+.topbar-search-box input::placeholder { color: #aabcaa; }
+.search-kbd {
+  font-size: .6rem; color: #aaa; border: 1px solid #ddd;
+  border-radius: 5px; padding: 1px 5px; background: #f8f8f8;
+  font-family: monospace; flex-shrink: 0;
+}
+.search-dropdown {
+  position: absolute; top: calc(100% + 6px); left: 0; right: 0;
+  background: #fff; border-radius: 14px;
+  border: 1.5px solid #e0eae4;
+  box-shadow: 0 12px 40px rgba(0,0,0,.14);
+  max-height: 320px; overflow-y: auto;
+  display: none; z-index: 200;
+}
+.search-dropdown.open { display: block; }
+.search-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 14px; text-decoration: none; color: #1a2e1e;
+  font-size: .82rem; transition: background .12s;
+}
+.search-item:hover { background: var(--hl-light); }
+.search-item-icon { font-size: 1.1rem; width: 26px; text-align: center; }
+.search-item-label { flex: 1; font-weight: 500; }
+.search-item-type {
+  font-size: .68rem; color: #888; background: #f0f4f1;
+  padding: 2px 8px; border-radius: 20px;
+}
+.search-empty { padding: 20px; text-align: center; color: #aaa; font-size: .82rem; }
+
+/* ═══════════════════════════════════════════════════════════════
+   TOPBAR ICON BUTTON
+═══════════════════════════════════════════════════════════════ */
+.topbar-icon-btn {
+  width: 36px; height: 36px; border-radius: 10px;
+  background: #f5f8f6; border: 1.5px solid #e0eae4;
+  display: flex; align-items: center; justify-content: center;
+  color: #4a6a50; text-decoration: none; position: relative;
+  transition: all .18s;
+}
+.topbar-icon-btn:hover { background: var(--hl-light); color: var(--hl-green); border-color: #b8dfc8; }
+.topbar-notif-dot {
+  position: absolute; top: -3px; right: -3px;
+  width: 9px; height: 9px; border-radius: 50%;
+  background: #ef5350; border: 2px solid #fff;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   TOAST NOTIFICATIONS
+═══════════════════════════════════════════════════════════════ */
+.app-toast {
+  display: flex; align-items: center; gap: 10px;
+  background: #fff; border-radius: 12px; padding: 13px 18px;
+  box-shadow: 0 8px 32px rgba(0,0,0,.18);
+  border-left: 4px solid #00723F;
+  font-size: .84rem; font-weight: 500; color: #1a2e1e;
+  min-width: 240px; max-width: 360px;
+  opacity: 0; transform: translateX(40px);
+  transition: all .3s cubic-bezier(.4,0,.2,1);
+}
+.app-toast.show { opacity: 1; transform: translateX(0); }
+
+/* ═══════════════════════════════════════════════════════════════
+   WHATSAPP BUTTON
+═══════════════════════════════════════════════════════════════ */
+.wa-btn {
+  width: 28px; height: 28px; border-radius: 8px;
+  background: #e8faf0; border: 1.5px solid #b8ead0;
+  display: flex; align-items: center; justify-content: center;
+  transition: all .18s; flex-shrink: 0;
+}
+.wa-btn:hover { background: #25D366; border-color: #25D366; transform: scale(1.1); }
+.wa-btn:hover svg path { fill: #fff; }

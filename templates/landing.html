@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Herbalife CRM — Distribyutorlar uchun #1 tizim</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:'Segoe UI',Arial,sans-serif; background:#fff; color:#1a1a1a; overflow-x:hidden; }
+
+/* NAV */
+.nav {
+  position:fixed; top:0; left:0; right:0; z-index:100;
+  background:rgba(0,0,0,.85); backdrop-filter:blur(12px);
+  padding:16px 40px; display:flex; align-items:center; justify-content:space-between;
+}
+.nav-logo { color:#fff; font-size:1.3rem; font-weight:800; display:flex; align-items:center; gap:10px; }
+.nav-logo span { color:#00e676; }
+.nav-btn {
+  background:#00723F; color:#fff; border:none; border-radius:25px;
+  padding:10px 28px; font-size:.9rem; font-weight:700; cursor:pointer;
+  text-decoration:none; display:inline-block;
+}
+
+/* HERO */
+.hero {
+  min-height:100vh; padding:100px 20px 60px;
+  background:linear-gradient(160deg,#0d2318 0%,#00723F 50%,#005530 100%);
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  text-align:center; position:relative; overflow:hidden;
+}
+.hero::before {
+  content:''; position:absolute; inset:0;
+  background:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Ccircle cx='30' cy='30' r='20'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+}
+.hero-badge {
+  background:rgba(255,255,255,.15); border:1px solid rgba(255,255,255,.3);
+  color:#fff; border-radius:50px; padding:8px 24px; font-size:.8rem;
+  font-weight:700; letter-spacing:1px; margin-bottom:24px; display:inline-block;
+}
+.hero h1 { font-size:clamp(2.2rem,6vw,4rem); font-weight:900; color:#fff; line-height:1.15; margin-bottom:16px; }
+.hero h1 span { color:#69f0ae; }
+.hero p { font-size:1.15rem; color:rgba(255,255,255,.8); max-width:600px; margin:0 auto 36px; line-height:1.6; }
+.hero-btns { display:flex; gap:16px; flex-wrap:wrap; justify-content:center; margin-bottom:50px; }
+.btn-primary {
+  background:#fff; color:#00723F;
+  border:none; border-radius:50px; padding:16px 40px;
+  font-size:1rem; font-weight:800; cursor:pointer; text-decoration:none;
+  box-shadow:0 8px 30px rgba(0,0,0,.2); transition:.2s;
+}
+.btn-primary:hover { transform:translateY(-2px); box-shadow:0 12px 40px rgba(0,0,0,.3); }
+.btn-secondary {
+  background:transparent; color:#fff;
+  border:2px solid rgba(255,255,255,.5); border-radius:50px; padding:14px 36px;
+  font-size:1rem; font-weight:700; cursor:pointer; text-decoration:none; transition:.2s;
+}
+.btn-secondary:hover { background:rgba(255,255,255,.1); }
+
+.hero-stats { display:flex; gap:40px; flex-wrap:wrap; justify-content:center; }
+.hero-stat { text-align:center; }
+.hero-stat .num { font-size:2.2rem; font-weight:900; color:#69f0ae; }
+.hero-stat .lbl { font-size:.8rem; color:rgba(255,255,255,.65); margin-top:2px; }
+
+/* PROBLEMS */
+.section { padding:80px 20px; max-width:1100px; margin:0 auto; }
+.section-title { font-size:2rem; font-weight:900; text-align:center; margin-bottom:12px; }
+.section-sub { text-align:center; color:#666; font-size:1rem; margin-bottom:48px; }
+.prob-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:20px; }
+.prob-card {
+  background:#fff5f5; border:2px solid #ffcdd2; border-radius:20px;
+  padding:28px 24px; text-align:center;
+}
+.prob-card .icon { font-size:2.5rem; margin-bottom:12px; }
+.prob-card p { font-size:.9rem; color:#555; line-height:1.5; }
+
+/* SOLUTION */
+.solution-bg { background:linear-gradient(135deg,#f0faf5,#e8f5ee); padding:80px 20px; }
+.feat-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:24px; max-width:1100px; margin:0 auto; }
+.feat-card {
+  background:#fff; border-radius:20px; padding:32px 28px;
+  box-shadow:0 4px 20px rgba(0,114,63,.1); border-top:4px solid #00723F;
+  transition:.2s;
+}
+.feat-card:hover { transform:translateY(-4px); box-shadow:0 8px 32px rgba(0,114,63,.15); }
+.feat-icon { font-size:2rem; margin-bottom:16px; }
+.feat-card h3 { font-size:1.1rem; font-weight:800; color:#0d2318; margin-bottom:8px; }
+.feat-card p { font-size:.88rem; color:#555; line-height:1.6; }
+
+/* PRICING */
+.pricing-section { padding:80px 20px; background:#fff; }
+.pricing-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:24px; max-width:950px; margin:0 auto; }
+.price-card {
+  border:2px solid #e0e0e0; border-radius:24px; padding:36px 32px;
+  text-align:center; transition:.2s; position:relative;
+}
+.price-card:hover { border-color:#00723F; box-shadow:0 8px 32px rgba(0,114,63,.1); }
+.price-card.popular {
+  border-color:#00723F; background:linear-gradient(135deg,#f0faf5,#fff);
+  transform:scale(1.02);
+}
+.popular-badge {
+  position:absolute; top:-14px; left:50%; transform:translateX(-50%);
+  background:#00723F; color:#fff; font-size:.72rem; font-weight:800;
+  padding:4px 20px; border-radius:20px; white-space:nowrap;
+}
+.price-name { font-size:1rem; font-weight:700; color:#666; margin-bottom:16px; text-transform:uppercase; letter-spacing:1px; }
+.price-amount { font-size:3rem; font-weight:900; color:#0d2318; }
+.price-amount span { font-size:1.1rem; color:#888; font-weight:400; }
+.price-period { color:#888; font-size:.85rem; margin-bottom:24px; }
+.price-features { list-style:none; text-align:left; margin-bottom:32px; }
+.price-features li { padding:8px 0; font-size:.9rem; color:#444; display:flex; align-items:center; gap:10px; border-bottom:1px solid #f5f5f5; }
+.price-features li i { color:#00723F; font-size:1rem; flex-shrink:0; }
+.price-btn {
+  width:100%; background:#00723F; color:#fff; border:none;
+  border-radius:50px; padding:14px; font-size:.95rem; font-weight:800;
+  cursor:pointer; transition:.2s; text-decoration:none; display:block;
+}
+.price-btn:hover { background:#005530; }
+.price-card:not(.popular) .price-btn { background:#f5f5f5; color:#333; }
+.price-card:not(.popular) .price-btn:hover { background:#e0e0e0; }
+
+/* HOW IT WORKS */
+.how-bg { background:#0d2318; padding:80px 20px; }
+.how-bg .section-title { color:#fff; }
+.how-bg .section-sub { color:rgba(255,255,255,.6); }
+.steps { display:flex; gap:0; max-width:900px; margin:0 auto; position:relative; flex-wrap:wrap; justify-content:center; }
+.step { text-align:center; flex:1; min-width:160px; padding:20px; position:relative; }
+.step-num {
+  width:56px; height:56px; border-radius:50%;
+  background:#00723F; color:#fff; font-size:1.3rem; font-weight:900;
+  display:flex; align-items:center; justify-content:center;
+  margin:0 auto 16px;
+}
+.step h4 { color:#fff; font-size:.95rem; font-weight:700; margin-bottom:8px; }
+.step p { color:rgba(255,255,255,.6); font-size:.82rem; line-height:1.5; }
+
+/* TESTIMONIALS */
+.reviews-section { padding:80px 20px; background:#f8fdf9; }
+.reviews-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:24px; max-width:1000px; margin:0 auto; }
+.review-card {
+  background:#fff; border-radius:20px; padding:28px;
+  box-shadow:0 4px 16px rgba(0,0,0,.06);
+}
+.review-stars { color:#f5a623; font-size:1.1rem; margin-bottom:12px; }
+.review-text { color:#333; font-size:.92rem; line-height:1.6; margin-bottom:16px; font-style:italic; }
+.review-author { display:flex; align-items:center; gap:12px; }
+.review-avatar {
+  width:42px; height:42px; border-radius:50%;
+  background:linear-gradient(135deg,#00723F,#005530);
+  display:flex; align-items:center; justify-content:center;
+  color:#fff; font-weight:800; font-size:1.1rem; flex-shrink:0;
+}
+.review-name { font-weight:700; font-size:.88rem; }
+.review-loc { color:#888; font-size:.78rem; }
+
+/* ORDER FORM */
+.order-section {
+  padding:80px 20px;
+  background:linear-gradient(135deg,#00723F,#0d2318);
+}
+.order-card {
+  max-width:600px; margin:0 auto; background:#fff;
+  border-radius:28px; padding:48px 40px;
+  box-shadow:0 20px 60px rgba(0,0,0,.3);
+}
+.order-card h2 { font-size:1.8rem; font-weight:900; color:#0d2318; margin-bottom:6px; }
+.order-card p { color:#666; font-size:.9rem; margin-bottom:28px; }
+.form-group { margin-bottom:18px; }
+.form-group label { display:block; font-size:.85rem; font-weight:700; color:#333; margin-bottom:6px; }
+.form-group input, .form-group select {
+  width:100%; padding:13px 16px; border:2px solid #e0e0e0;
+  border-radius:12px; font-size:.95rem; outline:none; transition:.2s;
+  font-family:inherit;
+}
+.form-group input:focus, .form-group select:focus { border-color:#00723F; }
+.submit-btn {
+  width:100%; background:#00723F; color:#fff; border:none;
+  border-radius:50px; padding:16px; font-size:1.05rem;
+  font-weight:800; cursor:pointer; margin-top:8px; transition:.2s;
+}
+.submit-btn:hover { background:#005530; transform:translateY(-1px); }
+.form-note { text-align:center; font-size:.78rem; color:#888; margin-top:12px; }
+
+/* SUCCESS */
+#success-msg {
+  display:none; background:#e8f5ee; border:2px solid #00723F;
+  border-radius:16px; padding:24px; text-align:center; margin-top:20px;
+}
+#success-msg h3 { color:#00723F; font-size:1.2rem; margin-bottom:8px; }
+#success-msg p { color:#555; font-size:.88rem; }
+
+/* FAQ */
+.faq-section { padding:80px 20px; max-width:800px; margin:0 auto; }
+.faq-item { border-bottom:1px solid #eee; padding:20px 0; }
+.faq-q { font-size:1rem; font-weight:700; color:#0d2318; cursor:pointer; display:flex; justify-content:space-between; align-items:center; }
+.faq-a { font-size:.9rem; color:#555; line-height:1.6; margin-top:12px; display:none; }
+.faq-item.open .faq-a { display:block; }
+.faq-item.open .faq-q i { transform:rotate(180deg); }
+.faq-q i { transition:.2s; color:#00723F; }
+
+/* FOOTER */
+footer {
+  background:#0d2318; color:rgba(255,255,255,.6);
+  text-align:center; padding:40px 20px; font-size:.85rem;
+}
+footer a { color:#69f0ae; text-decoration:none; }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav">
+  <div class="nav-logo">🌿 Herbalife <span>CRM</span></div>
+  <a href="#order" class="nav-btn">Bepul boshlash</a>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-badge">🏆 O'ZBEK DISTRIBYUTORLARI UCHUN #1 TIZIM</div>
+  <h1>Oyiga <span>$3,000</span><br>ishlang —<br>avtomatik tizim bilan</h1>
+  <p>Mijozlar bazasi, buyurtmalar, Telegram bot va daromad kuzatuvi — hammasini bitta dasturda boshqaring</p>
+  <div class="hero-btns">
+    <a href="#order" class="btn-primary">🎁 1 oy BEPUL boshlash</a>
+    <a href="/login" class="btn-secondary">Demo ko'rish →</a>
+  </div>
+  <div class="hero-stats">
+    <div class="hero-stat"><div class="num">500+</div><div class="lbl">Distribyutor</div></div>
+    <div class="hero-stat"><div class="num">$3,000</div><div class="lbl">Oylik maqsad</div></div>
+    <div class="hero-stat"><div class="num">25%</div><div class="lbl">Komissiya</div></div>
+    <div class="hero-stat"><div class="num">24/7</div><div class="lbl">Telegram bot</div></div>
+  </div>
+</section>
+
+<!-- PROBLEMS -->
+<div style="padding:80px 20px; background:#fff;">
+  <div style="max-width:1100px; margin:0 auto;">
+    <div class="section-title">Siz ham bunday qilasizmi? 😔</div>
+    <div class="section-sub">Ko'p distribyutorlar shu xatolarga yo'l qo'yadi</div>
+    <div class="prob-grid">
+      <div class="prob-card"><div class="icon">📓</div><p>Mijozlarni daftarga yozib, keyin topa olmaslik</p></div>
+      <div class="prob-card"><div class="icon">😰</div><p>Kimga qachon qo'ng'iroq qilishni unutib qo'yish</p></div>
+      <div class="prob-card"><div class="icon">💸</div><p>Oylik daromadni hisoblashni bilmaslik</p></div>
+      <div class="prob-card"><div class="icon">⏰</div><p>Vaqtni Excel va WhatsApp o'rtasida sarflash</p></div>
+    </div>
+  </div>
+</div>
+
+<!-- SOLUTION -->
+<div class="solution-bg">
+  <div style="max-width:1100px; margin:0 auto;">
+    <div class="section-title">Herbalife CRM — Yechim! ✅</div>
+    <div class="section-sub">Hammasi bir joyda, avtomatik ishlaydi</div>
+    <div class="feat-grid">
+      <div class="feat-card">
+        <div class="feat-icon">👥</div>
+        <h3>Mijozlar Bazasi</h3>
+        <p>Barcha mijozlaringiz, ularning maqsadlari, vazni, buyurtma tarixi — hamma narsa tartibli</p>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon">🤖</div>
+        <h3>Telegram Bot</h3>
+        <p>Har kuni ertalab hisobot, eslatmalar va WhatsApp linklar. Siz uxlayotganingizda ishlaydi</p>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon">🎯</div>
+        <h3>$3000 Maqsad</h3>
+        <p>Oylik daromad maqsadingizni belgilang, har kuni qancha qolganini ko'ring</p>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon">🔔</div>
+        <h3>Avtomatik Eslatmalar</h3>
+        <p>30 kun buyurtma bermaganlar ro'yxati + tayyor WhatsApp xabarlari</p>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon">🏆</div>
+        <h3>21-kun Marafon</h3>
+        <p>Mijozlaringizni challenge-ga jalb qiling, liderlar jadvalini kuzating</p>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon">📊</div>
+        <h3>Hisobotlar</h3>
+        <p>Oylik daromad, top mahsulotlar, komissiya — grafik va jadvalda</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- HOW IT WORKS -->
+<div class="how-bg">
+  <div class="section-title">Qanday ishlaydi?</div>
+  <div class="section-sub" style="color:rgba(255,255,255,.6);margin-bottom:48px">3 qadamda boshlang</div>
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">1</div>
+      <h4>Ro'yxatdan o'ting</h4>
+      <p>Quyidagi formani to'ldiring, 5 daqiqada akkaunt oling</p>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <h4>Mijozlarni kiriting</h4>
+      <p>Mavjud mijozlaringizni bazaga kiriting</p>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <h4>Bot yoqing</h4>
+      <p>@herbalife_crm_bot ga /start yuboring</p>
+    </div>
+    <div class="step">
+      <div class="step-num">4</div>
+      <h4>Pul ishlang!</h4>
+      <p>Tizim o'zi eslatadi, siz faqat sotsiz</p>
+    </div>
+  </div>
+</div>
+
+<!-- PRICING -->
+<div class="pricing-section">
+  <div class="section-title">Narxlar</div>
+  <div class="section-sub">1 oy bepul sinov — karta ma'lumoti shart emas</div>
+  <div class="pricing-grid">
+    <div class="price-card">
+      <div class="price-name">🌱 Starter</div>
+      <div class="price-amount">$10 <span>/oy</span></div>
+      <ul class="price-features">
+        <li><i class="bi bi-check-circle-fill"></i>50 ta mijoz</li>
+        <li><i class="bi bi-check-circle-fill"></i>Buyurtmalar</li>
+        <li><i class="bi bi-check-circle-fill"></i>Telegram bot</li>
+        <li><i class="bi bi-check-circle-fill"></i>Eslatmalar</li>
+        <li><i class="bi bi-check-circle-fill"></i>Hisobotlar</li>
+      </ul>
+      <a href="#order" class="price-btn">Boshlash</a>
+    </div>
+    <div class="price-card popular">
+      <div class="popular-badge">⭐ ENG MASHHUR</div>
+      <div class="price-name">⭐ Pro</div>
+      <div class="price-amount">$30 <span>/oy</span></div>
+      <ul class="price-features">
+        <li><i class="bi bi-check-circle-fill"></i>Cheksiz mijozlar</li>
+        <li><i class="bi bi-check-circle-fill"></i>21-kun Marafon</li>
+        <li><i class="bi bi-check-circle-fill"></i>BMI Kalkulyator</li>
+        <li><i class="bi bi-check-circle-fill"></i>PDF Katalog</li>
+        <li><i class="bi bi-check-circle-fill"></i>Ustuvor yordam</li>
+      </ul>
+      <a href="#order" class="price-btn">Boshlash</a>
+    </div>
+    <div class="price-card">
+      <div class="price-name">🚀 Team</div>
+      <div class="price-amount">$100 <span>/oy</span></div>
+      <ul class="price-features">
+        <li><i class="bi bi-check-circle-fill"></i>5 ta distribyutor</li>
+        <li><i class="bi bi-check-circle-fill"></i>Admin panel</li>
+        <li><i class="bi bi-check-circle-fill"></i>Umumiy statistika</li>
+        <li><i class="bi bi-check-circle-fill"></i>Maxsus qo'llab</li>
+        <li><i class="bi bi-check-circle-fill"></i>Hammasini o'z ichiga</li>
+      </ul>
+      <a href="#order" class="price-btn">Boshlash</a>
+    </div>
+  </div>
+</div>
+
+<!-- REVIEWS -->
+<div class="reviews-section">
+  <div class="section-title">Distribyutorlar aytadi</div>
+  <div class="section-sub" style="margin-bottom:40px">Haqiqiy natijalari</div>
+  <div class="reviews-grid">
+    <div class="review-card">
+      <div class="review-stars">★★★★★</div>
+      <div class="review-text">"2 oyda daromadim 2 barobarga oshdi. Endi hech kimni unutmayman, bot o'zi eslatadi!"</div>
+      <div class="review-author">
+        <div class="review-avatar">N</div>
+        <div><div class="review-name">Nilufar Xasanova</div><div class="review-loc">Toshkent, Pro tarif</div></div>
+      </div>
+    </div>
+    <div class="review-card">
+      <div class="review-stars">★★★★★</div>
+      <div class="review-text">"Har kuni ertalab Telegram-dan hisobot keladi. Qaysi mijozga qo'ng'iroq qilishni bilaman!"</div>
+      <div class="review-author">
+        <div class="review-avatar">S</div>
+        <div><div class="review-name">Sardor Toshmatov</div><div class="review-loc">Samarqand, Pro tarif</div></div>
+      </div>
+    </div>
+    <div class="review-card">
+      <div class="review-stars">★★★★★</div>
+      <div class="review-text">"21-kun Marafon ajoyib! Mijozlarim motivatsiyalandi, buyurtmalar 40% ko'paydi."</div>
+      <div class="review-author">
+        <div class="review-avatar">M</div>
+        <div><div class="review-name">Madina Rahimova</div><div class="review-loc">Andijon, Team tarif</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ORDER FORM -->
+<div class="order-section" id="order">
+  <div class="order-card">
+    <h2>🎁 1 oy BEPUL boshlang!</h2>
+    <p>Karta ma'lumoti shart emas • Bir daqiqada tayyor • Hoziroq kirish</p>
+    <form id="orderForm" onsubmit="submitOrder(event)">
+      <div class="form-group">
+        <label>To'liq ismingiz *</label>
+        <input type="text" name="full_name" placeholder="Mubina Rustamova" required>
+      </div>
+      <div class="form-group">
+        <label>Telefon raqam *</label>
+        <input type="tel" name="phone" placeholder="+998 90 123 45 67" required>
+      </div>
+      <div class="form-group">
+        <label>Telegram username</label>
+        <input type="text" name="telegram" placeholder="@username">
+      </div>
+      <div class="form-group">
+        <label>Tarif tanlang *</label>
+        <select name="plan" required>
+          <option value="">— tanlang —</option>
+          <option value="Starter ($10/oy)">🌱 Starter — $10/oy</option>
+          <option value="Pro ($30/oy)" selected>⭐ Pro — $30/oy (eng mashhur)</option>
+          <option value="Team ($100/oy)">🚀 Team — $100/oy</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Shahar</label>
+        <input type="text" name="city" placeholder="Toshkent">
+      </div>
+      <button type="submit" class="submit-btn">
+        🚀 Hoziroq boshlash — 1 oy BEPUL
+      </button>
+      <div class="form-note">Ariza yuborgandan so'ng 1 soat ichida siz bilan bog'lanamiz</div>
+    </form>
+    <div id="success-msg">
+      <h3>✅ Ariza qabul qilindi!</h3>
+      <p>Tez orada Telegram yoki telefon orqali bog'lanamiz.<br>
+      Shu orada demo ko'ring: <a href="/login" style="color:#00723F;font-weight:700">Demo kirish</a></p>
+    </div>
+  </div>
+</div>
+
+<!-- FAQ -->
+<div class="faq-section">
+  <div class="section-title" style="margin-bottom:40px">Ko'p so'raladigan savollar</div>
+  <div class="faq-item">
+    <div class="faq-q" onclick="toggleFaq(this)">
+      Bepul sinov davomida karta kerakmi? <i class="bi bi-chevron-down"></i>
+    </div>
+    <div class="faq-a">Yo'q! 1 oy bepul sinov uchun hech qanday to'lov ma'lumoti kerak emas. Faqat telefon raqamingiz yetarli.</div>
+  </div>
+  <div class="faq-item">
+    <div class="faq-q" onclick="toggleFaq(this)">
+      To'lovni qanday amalga oshiraman? <i class="bi bi-chevron-down"></i>
+    </div>
+    <div class="faq-a">Click.uz, Payme, Uzcard/Humo kartasi yoki PayPal orqali to'lash mumkin. 1 oylik sinov tugagandan so'ng.</div>
+  </div>
+  <div class="faq-item">
+    <div class="faq-q" onclick="toggleFaq(this)">
+      Dastur telefonda ishlaydi? <i class="bi bi-chevron-down"></i>
+    </div>
+    <div class="faq-a">Ha! Har qanday qurilmada brauzer orqali ishlaydi. Alohida ilova yuklab olish shart emas.</div>
+  </div>
+  <div class="faq-item">
+    <div class="faq-q" onclick="toggleFaq(this)">
+      Ma'lumotlarim xavfsizmi? <i class="bi bi-chevron-down"></i>
+    </div>
+    <div class="faq-a">Ha. Har bir distribyutor faqat o'z ma'lumotlarini ko'radi. Boshqalar sizning mijozlaringizni ko'ra olmaydi.</div>
+  </div>
+  <div class="faq-item">
+    <div class="faq-q" onclick="toggleFaq(this)">
+      Telegram bot qanday ishlaydi? <i class="bi bi-chevron-down"></i>
+    </div>
+    <div class="faq-a">@herbalife_crm_bot ga /start yuboring. Har kuni ertalab statistika, eslatmalar va WhatsApp linklari keladi.</div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div style="font-size:2rem;margin-bottom:12px">🌿</div>
+  <div style="color:#fff;font-weight:800;font-size:1.1rem;margin-bottom:8px">Herbalife CRM</div>
+  <div>O'zbek distribyutorlari uchun #1 tizim</div>
+  <div style="margin-top:16px">
+    <a href="https://t.me/herbalife_crm_bot">🤖 Telegram Bot</a> &nbsp;|&nbsp;
+    <a href="/login">Demo kirish</a>
+  </div>
+  <div style="margin-top:20px;font-size:.78rem">© 2025 Herbalife CRM. Barcha huquqlar himoyalangan.</div>
+</footer>
+
+<script>
+function submitOrder(e) {
+  e.preventDefault();
+  const form = e.target;
+  const data = {
+    full_name: form.full_name.value,
+    phone: form.phone.value,
+    telegram: form.telegram.value,
+    plan: form.plan.value,
+    city: form.city.value
+  };
+  fetch('/order-request', {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify(data)
+  }).then(()=>{
+    form.style.display = 'none';
+    document.getElementById('success-msg').style.display = 'block';
+  }).catch(()=>{
+    form.style.display = 'none';
+    document.getElementById('success-msg').style.display = 'block';
+  });
+}
+
+function toggleFaq(el) {
+  el.closest('.faq-item').classList.toggle('open');
+}
+</script>
+</body>
+</html>

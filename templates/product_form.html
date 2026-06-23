@@ -79,27 +79,56 @@
   <!-- Image -->
   <div class="form-card mb-3">
     <div class="form-card-title"><i class="bi bi-image"></i>Rasm</div>
-    <div class="row g-3 align-items-center">
-      <div class="col-md-8">
-        <label class="form-label">Rasm URL manzili</label>
-        <input name="image_url" id="img-url" class="form-control"
-               value="{{ product.image_url if product else '' }}"
-               placeholder="https://example.com/product.jpg"
-               oninput="previewImg(this.value)">
-        <div class="form-text">
-          Herbalife rasmini Google dan toping, o'ng tugma → "Rasm manzilini nusxalash"
-        </div>
-      </div>
+    <div class="row g-4 align-items-start">
+      <!-- Preview -->
       <div class="col-md-4 text-center">
-        <div id="img-preview" style="width:120px;height:100px;border-radius:12px;margin:0 auto;
-             background:linear-gradient(135deg,#00723F,#00b860);display:flex;align-items:center;
-             justify-content:center;font-size:2.5rem;overflow:hidden;border:2px solid #e0eae4">
+        <div id="img-preview" class="img-preview-box">
           {% if product and product.image_url %}
-            <img src="{{ product.image_url }}" style="width:100%;height:100%;object-fit:cover"
-                 onerror="this.parentElement.innerHTML='🥤'">
-          {% else %}🥤{% endif %}
+            <img src="{{ product.image_url }}" style="width:100%;height:100%;object-fit:cover;border-radius:14px"
+                 onerror="this.parentElement.innerHTML='<span class=img-preview-emoji>🥤</span>'">
+          {% else %}<span class="img-preview-emoji">🥤</span>{% endif %}
         </div>
-        <div class="text-muted mt-1" style="font-size:.7rem">Ko'rinishi</div>
+        <div class="text-muted mt-2" style="font-size:.72rem;letter-spacing:.3px">Rasm ko'rinishi</div>
+      </div>
+      <!-- URL input + tips -->
+      <div class="col-md-8">
+        <label class="form-label fw-semibold">Rasm URL manzili</label>
+        <div class="input-group mb-2">
+          <span class="input-group-text" style="background:#f5faf7;border-radius:10px 0 0 10px">
+            <i class="bi bi-link-45deg text-success"></i>
+          </span>
+          <input name="image_url" id="img-url" class="form-control"
+                 value="{{ product.image_url if product else '' }}"
+                 placeholder="https://example.com/product.jpg"
+                 oninput="previewImg(this.value)"
+                 style="border-radius:0 10px 10px 0">
+        </div>
+        <!-- Quick paste tip -->
+        <div class="img-tip-box mb-3">
+          <i class="bi bi-lightbulb-fill text-warning me-1"></i>
+          <strong>Qanday topish:</strong> Google → Rasmlar → Herbalife mahsulot
+          → rasm ustiga o'ng tugma → <em>"Rasm manzilini nusxalash"</em>
+          → bu yerga joylashtiring
+        </div>
+        <!-- Preset icons -->
+        <div class="form-label fw-semibold mb-2">
+          <i class="bi bi-grid-3x3-gap me-1 text-success"></i>Tez tanlash
+        </div>
+        <div class="img-preset-grid">
+          {% set presets = [
+            ('🍫','Шоколад'),('🍓','Клубника'),('🌿','Ваниль'),
+            ('🥤','Кокос'),('🌱','Вега'),('⚡','NRG'),
+            ('🧴','Алое'),('💪','Протеин'),('🌸','Колаген')
+          ] %}
+          {% for emoji, label in presets %}
+          <button type="button" class="img-preset-btn"
+                  onclick="setEmoji('{{ emoji }}','{{ label }}')"
+                  title="{{ label }}">
+            <span style="font-size:1.6rem">{{ emoji }}</span>
+            <span style="font-size:.62rem;color:#555;line-height:1.1">{{ label }}</span>
+          </button>
+          {% endfor %}
+        </div>
       </div>
     </div>
   </div>
@@ -153,10 +182,17 @@
 function previewImg(url) {
   const box = document.getElementById('img-preview');
   if (url) {
-    box.innerHTML = `<img src="${url}" style="width:100%;height:100%;object-fit:cover" onerror="this.parentElement.innerHTML='🥤'">`;
+    box.innerHTML = `<img src="${url}" style="width:100%;height:100%;object-fit:cover;border-radius:14px" onerror="this.parentElement.innerHTML='<span class=img-preview-emoji>🥤</span>'">`;
   } else {
-    box.innerHTML = '🥤';
+    box.innerHTML = '<span class="img-preview-emoji">🥤</span>';
   }
+}
+function setEmoji(emoji, label) {
+  document.getElementById('img-url').value = '';
+  const box = document.getElementById('img-preview');
+  box.innerHTML = `<span class="img-preview-emoji">${emoji}</span>`;
+  document.querySelectorAll('.img-preset-btn').forEach(b => b.classList.remove('active'));
+  event.currentTarget.classList.add('active');
 }
 </script>
 {% endblock %}

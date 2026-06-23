@@ -96,7 +96,7 @@ def generate_all():
         with open(path, 'w', encoding='utf-8') as f:
             f.write(_svg(title, subtitle, emoji, c1, c2))
         created += 1
-    print(f'[images] {created} SVG rasmlar yaratildi → static/images/products/')
+    print(f'[images] {created} SVG rasmlar yaratildi -> static/images/products/')
     return created
 
 

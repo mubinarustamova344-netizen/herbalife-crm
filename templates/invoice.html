@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <title>Invoice #{{ order.id }} — Herbalife</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap');
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Poppins', sans-serif; background: #f5f5f5; color: #1a1a1a; }
+    .page { max-width: 720px; margin: 30px auto; background: #fff;
+            border-radius: 16px; overflow: hidden; box-shadow: 0 8px 40px rgba(0,0,0,.12); }
+
+    /* Header */
+    .inv-header {
+      background: linear-gradient(135deg, #00723F 0%, #005530 100%);
+      padding: 36px 40px; display: flex; justify-content: space-between; align-items: center;
+    }
+    .inv-brand { color: #fff; }
+    .inv-brand-logo { font-size: 2.2rem; margin-bottom: 4px; }
+    .inv-brand-name { font-size: 1.2rem; font-weight: 800; letter-spacing: .5px; }
+    .inv-brand-sub { font-size: .72rem; color: rgba(255,255,255,.6); }
+    .inv-title-block { text-align: right; color: #fff; }
+    .inv-title { font-size: 2rem; font-weight: 800; letter-spacing: 2px; opacity: .9; }
+    .inv-num { font-size: .85rem; color: rgba(255,255,255,.7); margin-top: 4px; }
+    .inv-date { font-size: .78rem; color: rgba(255,255,255,.55); }
+
+    /* Body */
+    .inv-body { padding: 36px 40px; }
+
+    /* Info row */
+    .inv-info { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 32px; }
+    .inv-info-box { }
+    .inv-info-label { font-size: .65rem; font-weight: 700; color: #00723F;
+                      text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
+    .inv-info-val { font-size: .9rem; font-weight: 600; color: #1a2e1e; }
+    .inv-info-sub { font-size: .78rem; color: #888; margin-top: 2px; }
+
+    /* Table */
+    .inv-table { width: 100%; border-collapse: collapse; margin-bottom: 24px; }
+    .inv-table thead tr { background: #f5faf7; }
+    .inv-table th {
+      padding: 11px 14px; font-size: .72rem; font-weight: 700; color: #4a6a50;
+      text-transform: uppercase; letter-spacing: .8px; text-align: left;
+    }
+    .inv-table th:last-child, .inv-table td:last-child { text-align: right; }
+    .inv-table tbody tr { border-bottom: 1px solid #f0f5f2; }
+    .inv-table tbody tr:last-child { border-bottom: none; }
+    .inv-table td { padding: 13px 14px; font-size: .85rem; }
+    .inv-table .prod-name { font-weight: 600; color: #1a2e1e; }
+    .inv-table .prod-cat { font-size: .7rem; color: #aaa; }
+
+    /* Totals */
+    .inv-totals { border-top: 2px solid #e0eae4; padding-top: 16px; }
+    .inv-total-row { display: flex; justify-content: space-between;
+                     padding: 6px 0; font-size: .84rem; }
+    .inv-total-row.grand {
+      font-size: 1.05rem; font-weight: 800; color: #00723F;
+      border-top: 1.5px solid #c8e6d4; margin-top: 8px; padding-top: 12px;
+    }
+    .inv-commission {
+      background: #f3e5f5; border-radius: 10px; padding: 10px 14px;
+      display: flex; justify-content: space-between; align-items: center;
+      margin-top: 12px; font-size: .82rem;
+    }
+    .inv-commission span:last-child { font-weight: 700; color: #7b1fa2; }
+
+    /* Footer */
+    .inv-footer {
+      margin-top: 32px; padding-top: 20px;
+      border-top: 1px solid #f0f5f2;
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .inv-status { display: flex; align-items: center; gap: 8px; }
+    .inv-status-dot { width: 10px; height: 10px; border-radius: 50%; }
+    .inv-status-dot.paid { background: #00723F; }
+    .inv-status-dot.new { background: #0288d1; }
+    .inv-status-dot.shipped { background: #7b1fa2; }
+    .inv-status-dot.cancel { background: #d32f2f; }
+    .inv-watermark { font-size: .68rem; color: #ccc; }
+
+    /* Print button */
+    .print-bar {
+      display: flex; justify-content: center; gap: 12px; padding: 20px;
+      background: #f5f5f5;
+    }
+    .btn-print { padding: 10px 28px; border: none; border-radius: 10px; cursor: pointer;
+                 font-family: inherit; font-size: .88rem; font-weight: 600; }
+    .btn-print.primary { background: #00723F; color: #fff; }
+    .btn-print.secondary { background: #e0e0e0; color: #333; }
+
+    @media print {
+      body { background: #fff; }
+      .page { box-shadow: none; border-radius: 0; margin: 0; max-width: 100%; }
+      .print-bar { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="print-bar">
+  <button class="btn-print primary" onclick="window.print()">
+    🖨️ Chop etish / PDF saqlash
+  </button>
+  <button class="btn-print secondary" onclick="window.close()">✕ Yopish</button>
+</div>
+
+<div class="page">
+  <!-- Header -->
+  <div class="inv-header">
+    <div class="inv-brand">
+      <div class="inv-brand-logo">🌿</div>
+      <div class="inv-brand-name">Herbalife</div>
+      <div class="inv-brand-sub">Distribyutor CRM</div>
+    </div>
+    <div class="inv-title-block">
+      <div class="inv-title">INVOICE</div>
+      <div class="inv-num">#{{ "%04d" % order.id }}</div>
+      <div class="inv-date">{{ order.created_at.strftime('%d.%m.%Y') }}</div>
+    </div>
+  </div>
+
+  <!-- Body -->
+  <div class="inv-body">
+
+    <!-- Info -->
+    <div class="inv-info">
+      <div class="inv-info-box">
+        <div class="inv-info-label">Mijoz</div>
+        <div class="inv-info-val">{{ order.client.full_name }}</div>
+        {% if order.client.phone %}
+        <div class="inv-info-sub">📞 {{ order.client.phone }}</div>
+        {% endif %}
+        {% if order.client.email %}
+        <div class="inv-info-sub">✉️ {{ order.client.email }}</div>
+        {% endif %}
+      </div>
+      <div class="inv-info-box">
+        <div class="inv-info-label">Buyurtma ma'lumotlari</div>
+        <div class="inv-info-val">
+          {% if order.status == 'Yangi' %}🆕
+          {% elif order.status == "To'langan" %}✅
+          {% elif order.status == 'Yetkazildi' %}📦
+          {% else %}❌{% endif %}
+          {{ order.status }}
+        </div>
+        <div class="inv-info-sub">Sana: {{ order.created_at.strftime('%d.%m.%Y %H:%M') }}</div>
+      </div>
+    </div>
+
+    <!-- Items -->
+    <table class="inv-table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Mahsulot</th>
+          <th>Narx</th>
+          <th>Miqdor</th>
+          <th>Jami</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in order.items %}
+        <tr>
+          <td style="color:#aaa;font-size:.78rem">{{ loop.index }}</td>
+          <td>
+            <div class="prod-name">{{ item.product.name }}</div>
+            {% if item.product.category %}
+            <div class="prod-cat">{{ item.product.category }}</div>
+            {% endif %}
+          </td>
+          <td>${{ "%.2f"|format(item.unit_price) }}</td>
+          <td>× {{ item.qty }}</td>
+          <td><strong>${{ "%.2f"|format(item.qty * item.unit_price) }}</strong></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    <!-- Totals -->
+    <div class="inv-totals">
+      <div class="inv-total-row grand">
+        <span>Jami to'lov:</span>
+        <span>${{ "%.2f"|format(order.total_price) }}</span>
+      </div>
+    </div>
+
+    <div class="inv-commission">
+      <span>💜 Distribyutor komissiyasi ({{ commission_pct }}%)</span>
+      <span>${{ "%.2f"|format(order.commission(commission_pct)) }}</span>
+    </div>
+
+    {% if order.notes %}
+    <div style="margin-top:20px;padding:12px 16px;background:#f5faf7;border-radius:10px;
+                font-size:.82rem;color:#4a6a50">
+      <strong>Izoh:</strong> {{ order.notes }}
+    </div>
+    {% endif %}
+
+    <!-- Footer -->
+    <div class="inv-footer">
+      <div class="inv-status">
+        <div class="inv-status-dot {% if order.status == 'To\'langan' %}paid
+          {% elif order.status == 'Yetkazildi' %}shipped
+          {% elif order.status == 'Bekor' %}cancel
+          {% else %}new{% endif %}"></div>
+        <span style="font-size:.78rem;font-weight:600">{{ order.status }}</span>
+      </div>
+      <div class="inv-watermark">🌿 Herbalife CRM © 2025</div>
+    </div>
+
+  </div>
+</div>
+
+</body>
+</html>

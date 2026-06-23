@@ -32,7 +32,12 @@
           <div style="width:28px;height:28px;border-radius:8px;background:#e8f5ee;display:flex;align-items:center;justify-content:center">
             <i class="bi bi-telephone text-success" style="font-size:.8rem"></i>
           </div>
-          <span>{{ client.phone }}</span>
+          <a href="tel:{{ client.phone }}" class="text-decoration-none text-dark">{{ client.phone }}</a>
+          {% set wa_phone = client.phone | replace(' ','') | replace('+','') | replace('-','') %}
+          <a href="https://wa.me/{{ wa_phone }}" target="_blank" title="WhatsApp"
+             class="ms-auto wa-btn">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="#25D366"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+          </a>
         </div>
         {% endif %}
         {% if client.email %}
@@ -121,11 +126,32 @@
     </div>
     {% endif %}
 
+    <!-- Birthday badge -->
+    {% if client.birthday %}
+    {% set today = now().date() if now is defined else none %}
+    <div class="card-box mb-3" style="border:1.5px solid #ffe0e0;background:#fff8f8">
+      <div class="card-box-body py-2 px-3 d-flex align-items-center gap-2">
+        <span style="font-size:1.3rem">🎂</span>
+        <div>
+          <div class="fw-700" style="font-size:.82rem">Tug'ilgan kun</div>
+          <div class="text-muted" style="font-size:.75rem">{{ client.birthday.strftime('%d-%B') }}</div>
+        </div>
+      </div>
+    </div>
+    {% endif %}
+
     <!-- Action buttons -->
     <div class="d-grid gap-2">
       <a href="{{ url_for('order_add') }}" class="btn btn-hl py-2">
         <i class="bi bi-bag-plus me-2"></i>Yangi buyurtma
       </a>
+      <button type="button" class="btn btn-success py-2" data-bs-toggle="modal" data-bs-target="#weightModal">
+        <i class="bi bi-graph-up-arrow me-2"></i>Vazn qo'shish
+      </button>
+      <button type="button" class="btn" style="background:#0088cc;color:#fff"
+              data-bs-toggle="modal" data-bs-target="#telegramModal">
+        <i class="bi bi-telegram me-2"></i>Telegram xabar
+      </button>
       <a href="{{ url_for('client_edit', cid=client.id) }}" class="btn btn-hl-outline">
         <i class="bi bi-pencil me-2"></i>Tahrirlash
       </a>
@@ -136,10 +162,102 @@
         </button>
       </form>
     </div>
+
+    <!-- Weight Log Modal -->
+    <div class="modal fade" id="weightModal" tabindex="-1">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="border-radius:16px;border:none">
+          <div class="modal-header border-0 pb-0">
+            <h5 class="modal-title fw-700"><i class="bi bi-graph-up-arrow text-success me-2"></i>Vazn yozish</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+          <form method="post" action="{{ url_for('client_weight_log', cid=client.id) }}">
+          <div class="modal-body">
+            <div class="row g-3">
+              <div class="col-6">
+                <label class="form-label">Vazn (kg) *</label>
+                <input name="weight" type="number" step="0.1" class="form-control"
+                       placeholder="{{ client.weight_now or '70.0' }}" required>
+              </div>
+              <div class="col-6">
+                <label class="form-label">Sana</label>
+                <input name="date" type="date" class="form-control"
+                       value="{{ now().date().isoformat() if now is defined else '' }}">
+              </div>
+              <div class="col-12">
+                <label class="form-label">Izoh</label>
+                <input name="note" class="form-control" placeholder="Ertalabki o'lchov...">
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer border-0 pt-0">
+            <button type="button" class="btn btn-ghost" data-bs-dismiss="modal">Bekor</button>
+            <button type="submit" class="btn btn-hl px-4">Saqlash</button>
+          </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Telegram Modal -->
+    <div class="modal fade" id="telegramModal" tabindex="-1">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="border-radius:16px;border:none">
+          <div class="modal-header border-0 pb-0">
+            <h5 class="modal-title fw-700">
+              <i class="bi bi-telegram me-2" style="color:#0088cc"></i>Telegram xabar
+            </h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+          <form method="post" action="{{ url_for('client_telegram', cid=client.id) }}">
+          <div class="modal-body">
+            <p class="text-muted mb-3" style="font-size:.82rem">
+              Xabar Telegram bot orqali adminga yuboriladi
+            </p>
+            <div class="mb-3">
+              <label class="form-label">Xabar *</label>
+              <textarea name="message" class="form-control" rows="4" required
+                        placeholder="Assalomu alaykum! Yangi mahsulotlar haqida xabar bermoqchiman..."></textarea>
+            </div>
+            <div class="d-flex gap-2 flex-wrap">
+              {% for tmpl in ["Assalomu alaykum! Qanday ahvollar?", "Yangi mahsulotlar keldi!", "Natijalaringizni ko'rsating!"] %}
+              <button type="button" class="btn btn-sm"
+                      style="background:#f0f4f1;font-size:.72rem;border-radius:20px"
+                      onclick="document.querySelector('#telegramModal textarea').value='{{ tmpl }}'">
+                {{ tmpl[:25] }}…
+              </button>
+              {% endfor %}
+            </div>
+          </div>
+          <div class="modal-footer border-0 pt-0">
+            <button type="button" class="btn btn-ghost" data-bs-dismiss="modal">Bekor</button>
+            <button type="submit" class="btn px-4" style="background:#0088cc;color:#fff">
+              <i class="bi bi-send me-2"></i>Yuborish
+            </button>
+          </div>
+          </form>
+        </div>
+      </div>
+    </div>
   </div>
 
-  <!-- Right: orders -->
+  <!-- Right: weight chart + orders -->
   <div class="col-lg-8">
+
+    {% if weight_logs %}
+    <div class="card-box mb-3">
+      <div class="card-box-header">
+        <div class="card-box-title"><i class="bi bi-activity"></i>Vazn tarixi grafigi</div>
+        <button class="btn btn-ghost btn-sm" data-bs-toggle="modal" data-bs-target="#weightModal">
+          <i class="bi bi-plus me-1"></i>Yozish
+        </button>
+      </div>
+      <div class="card-box-body" style="padding-top:8px">
+        <canvas id="weightChart" height="80"></canvas>
+      </div>
+    </div>
+    {% endif %}
+
     <div class="card-box">
       <div class="card-box-header">
         <div class="card-box-title"><i class="bi bi-bag-fill"></i>Buyurtmalar tarixi</div>
@@ -194,4 +312,51 @@
     </div>
   </div>
 </div>
+{% endblock %}
+
+{% block scripts %}
+{% if weight_logs %}
+<script>
+const wLabels = {{ weight_logs | map(attribute='date') | map('string') | list | tojson }};
+const wData   = {{ weight_logs | map(attribute='weight') | list | tojson }};
+new Chart(document.getElementById('weightChart'), {
+  type: 'line',
+  data: {
+    labels: wLabels,
+    datasets: [{
+      label: 'Vazn (kg)',
+      data: wData,
+      borderColor: '#00723F',
+      backgroundColor: 'rgba(0,114,63,.08)',
+      borderWidth: 2.5,
+      pointRadius: 5,
+      pointBackgroundColor: '#00723F',
+      tension: 0.35,
+      fill: true,
+    }]
+  },
+  options: {
+    responsive: true,
+    plugins: {
+      legend: { display: false },
+      tooltip: { callbacks: { label: ctx => ctx.parsed.y + ' kg' } }
+    },
+    scales: {
+      y: { grid: { color: '#f0f5f2' }, ticks: { font: { size: 10 }, callback: v => v + 'kg' } },
+      x: { grid: { display: false }, ticks: { font: { size: 10 } } }
+    }
+  }
+});
+</script>
+{% endif %}
+
+<script>
+// Set today's date in weight modal
+document.addEventListener('DOMContentLoaded', () => {
+  const dateInput = document.querySelector('#weightModal input[type=date]');
+  if (dateInput && !dateInput.value) {
+    dateInput.value = new Date().toISOString().split('T')[0];
+  }
+});
+</script>
 {% endblock %}

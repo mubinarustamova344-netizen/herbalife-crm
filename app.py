@@ -5,7 +5,7 @@ from flask import Flask, render_template, request, jsonify, redirect, url_for, f
 from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 from sqlalchemy import func
-from models import db, Client, Product, Order, OrderItem, Challenge, ChallengeParticipant, User
+from models import db, Client, Product, Order, OrderItem, Challenge, ChallengeParticipant, User, WeightLog
 from make_images import generate_all as _gen_images, NAME_TO_FILE as _IMG_MAP
 from download_images import download_all as _download_real_images, NAME_TO_URL as _REAL_URL
 
@@ -29,7 +29,10 @@ COMMISSION_PCT = 25
 
 @login_manager.user_loader
 def load_user(uid):
-    return User.query.get(int(uid))
+    try:
+        return User.query.get(int(uid))
+    except (ValueError, TypeError):
+        return None
 
 
 def _cq():
@@ -72,6 +75,11 @@ def _init_db():
             if col not in prod_cols:
                 conn.execute(text(f'ALTER TABLE products ADD COLUMN {col} {typ}'))
         conn.commit()
+        # clients.birthday
+        client_cols2 = [c['name'] for c in insp.get_columns('clients')]
+        if 'birthday' not in client_cols2:
+            conn.execute(text('ALTER TABLE clients ADD COLUMN birthday DATE'))
+            conn.commit()
 
     if not User.query.first():
         admin = User(username='admin', full_name='Admin', is_admin=True, is_active=True)
@@ -84,6 +92,45 @@ def _init_db():
 @app.before_request
 def ensure_db():
     _init_db()
+
+
+# ── Landing page ──────────────────────────────────────────────────────────────
+@app.route('/landing')
+def landing():
+    return render_template('landing.html')
+
+
+@app.route('/order-request', methods=['POST'])
+def order_request():
+    data = request.get_json() or {}
+    full_name = data.get('full_name', '')
+    phone     = data.get('phone', '')
+    telegram  = data.get('telegram', '')
+    plan      = data.get('plan', '')
+    city      = data.get('city', '')
+
+    # Telegram orqali bildirishnoma yuborish
+    token = os.environ.get('TELEGRAM_BOT_TOKEN', '')
+    chat_id_file = os.path.join(os.path.dirname(__file__), '.chat_id')
+    if token and os.path.exists(chat_id_file):
+        try:
+            import urllib.request, urllib.parse
+            chat_id = open(chat_id_file).read().strip()
+            msg = (
+                f"🔥 YANGI ARIZA!\n\n"
+                f"👤 Ism: {full_name}\n"
+                f"📱 Tel: {phone}\n"
+                f"💬 Telegram: {telegram}\n"
+                f"🌍 Shahar: {city}\n"
+                f"💎 Tarif: {plan}\n\n"
+                f"Tez bog'laning! 🚀"
+            )
+            url = f"https://api.telegram.org/bot{token}/sendMessage"
+            params = urllib.parse.urlencode({'chat_id': chat_id, 'text': msg})
+            urllib.request.urlopen(f"{url}?{params}", timeout=5)
+        except Exception:
+            pass
+    return jsonify({'ok': True})
 
 
 # ── Auth ──────────────────────────────────────────────────────────────────────
@@ -261,6 +308,8 @@ def clients():
 @login_required
 def client_add():
     if request.method == 'POST':
+        from datetime import date as _date
+        bday_str = request.form.get('birthday', '').strip()
         c = Client(
             owner_id=current_user.id,
             full_name=request.form['full_name'].strip(),
@@ -268,6 +317,7 @@ def client_add():
             email=request.form.get('email', '').strip(),
             address=request.form.get('address', '').strip(),
             goal=request.form.get('goal', '').strip(),
+            birthday=_date.fromisoformat(bday_str) if bday_str else None,
             weight_start=float(request.form['weight_start']) if request.form.get('weight_start') else None,
             weight_now=float(request.form['weight_now']) if request.form.get('weight_now') else None,
             notes=request.form.get('notes', '').strip(),
@@ -284,11 +334,14 @@ def client_add():
 def client_edit(cid):
     c = _cq().filter_by(id=cid).first_or_404()
     if request.method == 'POST':
+        from datetime import date as _date
+        bday_str = request.form.get('birthday', '').strip()
         c.full_name    = request.form['full_name'].strip()
         c.phone        = request.form.get('phone', '').strip()
         c.email        = request.form.get('email', '').strip()
         c.address      = request.form.get('address', '').strip()
         c.goal         = request.form.get('goal', '').strip()
+        c.birthday     = _date.fromisoformat(bday_str) if bday_str else None
         c.weight_start = float(request.form['weight_start']) if request.form.get('weight_start') else None
         c.weight_now   = float(request.form['weight_now']) if request.form.get('weight_now') else None
         c.notes        = request.form.get('notes', '').strip()
@@ -303,8 +356,64 @@ def client_edit(cid):
 def client_detail(cid):
     c = _cq().filter_by(id=cid).first_or_404()
     orders = Order.query.filter_by(client_id=cid).order_by(Order.created_at.desc()).all()
+    weight_logs = WeightLog.query.filter_by(client_id=cid).order_by(WeightLog.date).all()
     return render_template('client_detail.html', client=c, orders=orders,
-                           commission_pct=COMMISSION_PCT)
+                           weight_logs=weight_logs, commission_pct=COMMISSION_PCT)
+
+
+@app.route('/clients/<int:cid>/weight', methods=['POST'])
+@login_required
+def client_weight_log(cid):
+    _cq().filter_by(id=cid).first_or_404()
+    w = request.form.get('weight', '').strip()
+    note = request.form.get('note', '').strip()
+    date_str = request.form.get('date', '').strip()
+    if not w:
+        flash('Vazn kiritilishi shart!', 'warning')
+        return redirect(url_for('client_detail', cid=cid))
+    from datetime import date as _date
+    log_date = _date.fromisoformat(date_str) if date_str else _date.today()
+    log = WeightLog(client_id=cid, weight=float(w), note=note, date=log_date)
+    db.session.add(log)
+    # Update client's current weight
+    c = Client.query.get(cid)
+    c.weight_now = float(w)
+    db.session.commit()
+    flash('Vazn saqlandi!', 'success')
+    return redirect(url_for('client_detail', cid=cid))
+
+
+@app.route('/clients/<int:cid>/telegram', methods=['POST'])
+@login_required
+def client_telegram(cid):
+    c = _cq().filter_by(id=cid).first_or_404()
+    msg = request.form.get('message', '').strip()
+    if not msg:
+        flash('Xabar bo\'sh!', 'warning')
+        return redirect(url_for('client_detail', cid=cid))
+    token = os.environ.get('TELEGRAM_BOT_TOKEN', '')
+    chat_id_file = os.path.join(os.path.dirname(__file__), '.chat_id')
+    if token and os.path.exists(chat_id_file):
+        try:
+            import urllib.request, urllib.parse
+            chat_id = open(chat_id_file).read().strip()
+            full_msg = f"📩 {c.full_name} ga xabar:\n\n{msg}"
+            url = f"https://api.telegram.org/bot{token}/sendMessage"
+            params = urllib.parse.urlencode({'chat_id': chat_id, 'text': full_msg})
+            urllib.request.urlopen(f"{url}?{params}", timeout=5)
+            flash('Telegram xabar yuborildi!', 'success')
+        except Exception:
+            flash('Telegram xabar yuborishda xato!', 'danger')
+    else:
+        flash('Telegram bot sozlanmagan.', 'warning')
+    return redirect(url_for('client_detail', cid=cid))
+
+
+@app.route('/orders/<int:oid>/invoice')
+@login_required
+def order_invoice(oid):
+    order = Order.query.get_or_404(oid)
+    return render_template('invoice.html', order=order, commission_pct=COMMISSION_PCT)
 
 
 @app.route('/clients/<int:cid>/delete', methods=['POST'])
@@ -425,6 +534,7 @@ def orders():
 def order_add():
     clients_list  = _cq().order_by(Client.full_name).all()
     products_list = Product.query.order_by(Product.name).all()
+    preset_pid    = request.args.get('pid', type=int)
     if request.method == 'POST':
         cid = int(request.form['client_id'])
         o = Order(
@@ -459,7 +569,8 @@ def order_add():
         flash('Buyurtma yaratildi!', 'success')
         return redirect(url_for('orders'))
     return render_template('order_form.html', order=None,
-                           clients=clients_list, products=products_list)
+                           clients=clients_list, products=products_list,
+                           preset_pid=preset_pid)
 
 
 @app.route('/orders/<int:oid>')
@@ -828,6 +939,28 @@ def api_product(pid):
 def api_clients():
     clients_list = _cq().order_by(Client.full_name).all()
     return jsonify([{'id': c.id, 'name': c.full_name} for c in clients_list])
+
+
+@app.route('/api/search')
+@login_required
+def api_search():
+    q = request.args.get('q', '').strip()
+    if len(q) < 2:
+        return jsonify({'results': []})
+    results = []
+    pattern = f'%{q}%'
+    for c in _cq().filter(Client.full_name.ilike(pattern)).limit(5).all():
+        results.append({'icon': '👤', 'label': c.full_name,
+                        'type': 'Mijoz', 'url': f'/clients/{c.id}'})
+    for o in Order.query.join(Client).filter(
+        (Client.full_name.ilike(pattern)) | (Order.id == q if q.isdigit() else False)
+    ).limit(4).all():
+        results.append({'icon': '🛒', 'label': f'#{o.id} — {o.client.full_name}',
+                        'type': 'Buyurtma', 'url': f'/orders/{o.id}'})
+    for p in Product.query.filter(Product.name.ilike(pattern)).limit(4).all():
+        results.append({'icon': '📦', 'label': p.name,
+                        'type': 'Mahsulot', 'url': f'/products'})
+    return jsonify({'results': results[:10]})
 
 
 if __name__ == '__main__':

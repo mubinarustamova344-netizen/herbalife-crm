@@ -38,11 +38,13 @@ class Client(db.Model):
     email         = db.Column(db.String(120))
     address       = db.Column(db.String(200))
     goal          = db.Column(db.String(200))
+    birthday      = db.Column(db.Date, nullable=True)
     weight_start  = db.Column(db.Float)
     weight_now    = db.Column(db.Float)
     notes         = db.Column(db.Text)
     created_at    = db.Column(db.DateTime, default=datetime.utcnow)
     orders        = db.relationship('Order', backref='client', lazy=True, cascade='all, delete-orphan')
+    weight_logs   = db.relationship('WeightLog', backref='client', lazy=True, cascade='all, delete-orphan')
 
     def total_spent(self):
         return sum(o.total_price for o in self.orders)
@@ -113,6 +115,16 @@ class OrderItem(db.Model):
     product_id = db.Column(db.Integer, db.ForeignKey('products.id'), nullable=False)
     qty        = db.Column(db.Integer, default=1)
     unit_price = db.Column(db.Float, default=0)
+
+
+class WeightLog(db.Model):
+    __tablename__ = 'weight_logs'
+    id         = db.Column(db.Integer, primary_key=True)
+    client_id  = db.Column(db.Integer, db.ForeignKey('clients.id'), nullable=False)
+    date       = db.Column(db.Date, default=datetime.utcnow)
+    weight     = db.Column(db.Float, nullable=False)
+    note       = db.Column(db.String(200))
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
 
 class Challenge(db.Model):
