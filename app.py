@@ -155,6 +155,15 @@ def order_request():
 
 
 # ── Auth ──────────────────────────────────────────────────────────────────────
+@app.route('/demo')
+def demo_login():
+    """Bir click bilan demo akkauntga kirish."""
+    user = User.query.filter_by(username='admin').first()
+    if user:
+        login_user(user, remember=True)
+    return redirect(url_for('dashboard'))
+
+
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if current_user.is_authenticated:
