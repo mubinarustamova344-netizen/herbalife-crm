@@ -26,6 +26,26 @@ login_manager.login_message_category = 'warning'
 
 COMMISSION_PCT = 25
 
+# CDN URLs — to'g'ridan-to'g'ri tashqi manzillar (Railway uchun)
+PRODUCT_CDN_IMAGES = {
+    'Formula 1 Шоколад':        'https://cdn11.bigcommerce.com/s-yyr3tzu8q0/images/stencil/728x728/products/112/1092/herbalife-formula1-smooth-chocolate-550g-tub__69257.1760112844.jpg?c=2',
+    'Formula 1 Ваниль':         'https://cdn11.bigcommerce.com/s-yyr3tzu8q0/images/stencil/728x728/products/160/992/herbalife-formula1-vanilla-cream-780g-tub__40073.1756481225.jpg?c=2',
+    'Formula 1 Клубника':       'https://cdn11.bigcommerce.com/s-yyr3tzu8q0/images/stencil/728x728/products/115/989/herbalife-formula1-healthy-meal-nutritional-shake-strawberry-delight-550g-container__22723.1756456788.jpg?c=2',
+    'Formula 1 Лесной Орех':    'https://cdn11.bigcommerce.com/s-yyr3tzu8q0/images/stencil/728x728/products/126/1001/herbalife-formula1-healthy-meal-nutritional-shake-mint-and-chocolate-550g-container__97767.1760368011.jpg?c=2',
+    'Formula 1 Vega':           'https://cdn11.bigcommerce.com/s-yyr3tzu8q0/images/stencil/728x728/products/154/895/pc-2600-gb-ie-ic.png-pdp-w875h783__05483__68310.1760537301.jpg?c=2',
+    'Протеиновый Коктейль':     'https://cdn11.bigcommerce.com/s-yyr3tzu8q0/images/stencil/728x728/products/154/888/pp-pdm-emea.jpg-pdp-w875h783__55053.1760537301.jpg?c=2',
+    'CR7 Drive':                'https://cdn11.bigcommerce.com/s-yyr3tzu8q0/images/stencil/728x728/products/183/984/herbalife24-cr7-drive-cannister-acai-berry-flavour-tub__52720.1751969190.jpg?c=2',
+    'Алоэ Вера Концентрат':     'https://cdn11.bigcommerce.com/s-yyr3tzu8q0/images/stencil/728x728/products/166/631/1065-aloe-concentrate-aloe-mango-473ml_-_Bottle__83104.1705400368.png?c=2',
+    'Чай НРГ Лимон-Имбирь':    'https://cdn11.bigcommerce.com/s-yyr3tzu8q0/images/stencil/728x728/products/149/1076/herbalife-instant-herbal-beverage-with-tea-extracts-lemon-flavour-51g-container__51157.1758441060.jpg?c=2',
+    'Чай НРГ Малина':           'https://cdn11.bigcommerce.com/s-yyr3tzu8q0/images/stencil/728x728/products/148/1073/herbalife-instant-herbal-beverage-rasperry-flavour-bottle__17428.1758294813.jpg?c=2',
+    'Formula 2 Мультивитамины': 'https://cdn11.bigcommerce.com/s-yyr3tzu8q0/images/stencil/532x532/products/113/401/Formula_2_-_Vitamin_and_Mineral_Complex_Womens_60_Tablets_-_Container__55652.1758111798.png?c=2',
+    'Омега-3':                  'https://cdn11.bigcommerce.com/s-yyr3tzu8q0/images/stencil/728x728/products/122/970/herbalife-herbalifeline-max-BOX__38280.1751640428.jpg?c=2',
+    'Skin Коллаген':            'https://cdn11.bigcommerce.com/s-yyr3tzu8q0/images/stencil/728x728/products/199/861/Collagen_SKIN_Booster_strawberry_and_lemon_171g__28360.1704382807.png?c=2',
+    'Термо Комплит':            'https://cdn11.bigcommerce.com/s-yyr3tzu8q0/images/stencil/728x728/products/218/1166/herbalife-phyto-complete-sachet__86770.1767713545.1280.1280__18875.1767719966.jpg?c=2',
+    'Иммью Буст':               'https://cdn11.bigcommerce.com/s-yyr3tzu8q0/images/stencil/728x728/products/188/1140/herbalife-immune-booster-berry-flavour-box__72386.1761751718.jpg?c=2',
+    'Активная Клетчатка':       'https://cdn11.bigcommerce.com/s-yyr3tzu8q0/images/stencil/532x532/products/135/1047/herbalife-oat-apple-fibre-tub__82549.1757692511.jpg?c=2',
+}
+
 
 @login_manager.user_loader
 def load_user(uid):
@@ -85,35 +105,6 @@ def _init_db():
         admin = User(username='admin', full_name='Admin', is_admin=True, is_active=True)
         admin.set_password('herbalife123')
         db.session.add(admin)
-        db.session.commit()
-
-    # Mahsulot rasmlari — CDN URL larini to'g'ridan-to'g'ri bazaga yozamiz
-    # (Railway da fayl tizimi vaqtinchalik, shuning uchun tashqi URL ishlatiladi)
-    _PRODUCT_IMAGES = {
-        'Formula 1 Шоколад':       'https://cdn11.bigcommerce.com/s-yyr3tzu8q0/images/stencil/728x728/products/112/1092/herbalife-formula1-smooth-chocolate-550g-tub__69257.1760112844.jpg?c=2',
-        'Formula 1 Ваниль':        'https://cdn11.bigcommerce.com/s-yyr3tzu8q0/images/stencil/728x728/products/160/992/herbalife-formula1-vanilla-cream-780g-tub__40073.1756481225.jpg?c=2',
-        'Formula 1 Клубника':      'https://cdn11.bigcommerce.com/s-yyr3tzu8q0/images/stencil/728x728/products/115/989/herbalife-formula1-healthy-meal-nutritional-shake-strawberry-delight-550g-container__22723.1756456788.jpg?c=2',
-        'Formula 1 Лесной Орех':   'https://cdn11.bigcommerce.com/s-yyr3tzu8q0/images/stencil/728x728/products/126/1001/herbalife-formula1-healthy-meal-nutritional-shake-mint-and-chocolate-550g-container__97767.1760368011.jpg?c=2',
-        'Formula 1 Vega':          'https://cdn11.bigcommerce.com/s-yyr3tzu8q0/images/stencil/728x728/products/154/895/pc-2600-gb-ie-ic.png-pdp-w875h783__05483__68310.1760537301.jpg?c=2',
-        'Протеиновый Коктейль':    'https://cdn11.bigcommerce.com/s-yyr3tzu8q0/images/stencil/728x728/products/154/888/pp-pdm-emea.jpg-pdp-w875h783__55053.1760537301.jpg?c=2',
-        'CR7 Drive':               'https://cdn11.bigcommerce.com/s-yyr3tzu8q0/images/stencil/728x728/products/183/984/herbalife24-cr7-drive-cannister-acai-berry-flavour-tub__52720.1751969190.jpg?c=2',
-        'Алоэ Вера Концентрат':    'https://cdn11.bigcommerce.com/s-yyr3tzu8q0/images/stencil/728x728/products/166/631/1065-aloe-concentrate-aloe-mango-473ml_-_Bottle__83104.1705400368.png?c=2',
-        'Чай НРГ Лимон-Имбирь':   'https://cdn11.bigcommerce.com/s-yyr3tzu8q0/images/stencil/728x728/products/149/1076/herbalife-instant-herbal-beverage-with-tea-extracts-lemon-flavour-51g-container__51157.1758441060.jpg?c=2',
-        'Чай НРГ Малина':          'https://cdn11.bigcommerce.com/s-yyr3tzu8q0/images/stencil/728x728/products/148/1073/herbalife-instant-herbal-beverage-rasperry-flavour-bottle__17428.1758294813.jpg?c=2',
-        'Formula 2 Мультивитамины':'https://cdn11.bigcommerce.com/s-yyr3tzu8q0/images/stencil/532x532/products/113/401/Formula_2_-_Vitamin_and_Mineral_Complex_Womens_60_Tablets_-_Container__55652.1758111798.png?c=2',
-        'Омега-3':                 'https://cdn11.bigcommerce.com/s-yyr3tzu8q0/images/stencil/728x728/products/122/970/herbalife-herbalifeline-max-BOX__38280.1751640428.jpg?c=2',
-        'Skin Коллаген':           'https://cdn11.bigcommerce.com/s-yyr3tzu8q0/images/stencil/728x728/products/199/861/Collagen_SKIN_Booster_strawberry_and_lemon_171g__28360.1704382807.png?c=2',
-        'Термо Комплит':           'https://cdn11.bigcommerce.com/s-yyr3tzu8q0/images/stencil/728x728/products/218/1166/herbalife-phyto-complete-sachet__86770.1767713545.1280.1280__18875.1767719966.jpg?c=2',
-        'Иммью Буст':              'https://cdn11.bigcommerce.com/s-yyr3tzu8q0/images/stencil/728x728/products/188/1140/herbalife-immune-booster-berry-flavour-box__72386.1761751718.jpg?c=2',
-        'Активная Клетчатка':      'https://cdn11.bigcommerce.com/s-yyr3tzu8q0/images/stencil/532x532/products/135/1047/herbalife-oat-apple-fibre-tub__82549.1757692511.jpg?c=2',
-    }
-    updated = 0
-    for prod in Product.query.all():
-        cdn_url = _PRODUCT_IMAGES.get(prod.name)
-        if cdn_url and prod.image_url != cdn_url:
-            prod.image_url = cdn_url
-            updated += 1
-    if updated:
         db.session.commit()
 
     _db_initialized = True
@@ -1180,22 +1171,16 @@ if __name__ == '__main__':
             db.session.commit()
             print(f'Katalog: {len(demo)} ta mahsulot qo\'shildi!')
 
-        # Assign real images (downloaded JPG/PNG) to all products; fallback to SVG
+        # CDN URL larini to'g'ridan-to'g'ri bazaga yozamiz
         updated = 0
         for prod in Product.query.all():
-            # Prefer real downloaded image
-            real_url = _REAL_URL.get(prod.name)
-            if real_url:
-                prod.image_url = real_url
+            cdn_url = PRODUCT_CDN_IMAGES.get(prod.name)
+            if cdn_url and prod.image_url != cdn_url:
+                prod.image_url = cdn_url
                 updated += 1
-            elif not prod.image_url:
-                fname = _IMG_MAP.get(prod.name)
-                if fname:
-                    prod.image_url = f'/static/images/products/{fname}.svg'
-                    updated += 1
         if updated:
             db.session.commit()
-            print(f'[images] {updated} ta mahsulotga rasm biriktirildi.')
+            print(f'[images] {updated} ta mahsulotga CDN rasm biriktirildi.')
 
     env_port = os.environ.get('PORT')
     if env_port:
