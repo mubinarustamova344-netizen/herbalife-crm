@@ -58,10 +58,10 @@ PRODUCT_CDN_IMAGES = {
     'Алоэ Вера Манго':            f'{_P}/166/images/631/1065-aloe-concentrate-aloe-mango-473ml_-_Bottle__83104.1705400368.386.513.png?c=2',
     'Мангостин-Малина Напиток':   f'{_S}/mangostin.svg',
     # ── Sport H24 ─────────────────────────────────────────────────────────────
-    'H24 Achieve':                'https://herbaproducts.com/wp-content/uploads/2016/06/h24-hydrate-shadow.png',
+    'H24 Achieve':                f'{_P}/158/images/571/HERBALIFE24_-_Hydrate_-_Bottle__16698.1565259107.386.513.jpg?c=2',
     'H24 Prolong':                'https://herbaproducts.com/wp-content/uploads/2016/06/h24-prolong-shadow.png',
     'H24 Rebuild Strength':       f'{_P}/128/images/890/herbalife24-rebuild-strength__22062.1763037922.386.513.jpg?c=2',
-    'H24 Rebuild Endurance':      'https://herbaproducts.com/wp-content/uploads/2016/06/h24-endurance-shadow.png',
+    'H24 Rebuild Endurance':      f'{_P}/151/images/538/HERBALIFE24_-_Restore_-_Container__51263.1552503764.386.513.png?c=2',
     # ── Vitaminlar ────────────────────────────────────────────────────────────
     'Formula 2 Мультивитамины':   'https://cdn11.bigcommerce.com/s-yyr3tzu8q0/images/stencil/532x532/products/113/401/Formula_2_-_Vitamin_and_Mineral_Complex_Womens_60_Tablets_-_Container__55652.1758111798.png?c=2',
     'Омега-3':                    f'{_CDN}/122/970/herbalife-herbalifeline-max-BOX__38280.1751640428.jpg?c=2',
@@ -79,7 +79,7 @@ PRODUCT_CDN_IMAGES = {
     'Крем для рук':               f'{_P}/186/images/745/Herbalife_SKIN_5_-_Daily_Glow_Moisturiser__71723.1704302888.386.513.png?c=2',
     # ── Dobavki ───────────────────────────────────────────────────────────────
     'Активная Клетчатка':         'https://cdn11.bigcommerce.com/s-yyr3tzu8q0/images/stencil/532x532/products/135/1047/herbalife-oat-apple-fibre-tub__82549.1757692511.jpg?c=2',
-    'Пробиотик Комплекс':         f'{_S}/probiotic.svg',
+    'Пробиотик Комплекс':         f'{_P}/216/images/1156/herbalife-microbiotic-max-vanilla-box__87442.1765294042.386.513.jpg?c=2',
     'Л-Карнитин':                 f'{_S}/lcarnitine.svg',
     'BCAA Комплекс':              f'{_S}/bcaa.svg',
     'Глюкозамин Плюс':            f'{_S}/glucosamine.svg',
@@ -1117,7 +1117,10 @@ if __name__ == '__main__':
         _download_real_images()
 
         # To'liq katalog — 46 ta mahsulot
-        if Product.query.count() < 44:
+        # Reseed if: empty, too few, or duplicates detected
+        _need_seed = (Product.query.count() < 44 or
+                      Product.query.filter_by(name='Formula 1 Шоколад').count() > 1)
+        if _need_seed:
             Product.query.delete()
             db.session.commit()
             demo = [
