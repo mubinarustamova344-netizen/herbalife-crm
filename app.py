@@ -657,6 +657,90 @@ def order_delete(oid):
 
 
 # ── Napitki & Calculator ──────────────────────────────────────────────────────
+@app.route('/analytics')
+@login_required
+def analytics():
+    from datetime import datetime, timedelta
+    from collections import defaultdict
+    today = datetime.utcnow()
+    month_start = today.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+    orders = _oq().order_by(Order.created_at.desc()).all()
+    this_month = [o for o in orders if o.created_at >= month_start]
+    month_revenue = sum(o.total_price for o in this_month)
+    lm_start = (month_start - timedelta(days=1)).replace(day=1)
+    lm_rev = sum(o.total_price for o in orders if lm_start <= o.created_at < month_start)
+    days_labels, days_data = [], []
+    for i in range(29, -1, -1):
+        d = today - timedelta(days=i)
+        ds = d.replace(hour=0, minute=0, second=0, microsecond=0)
+        de = d.replace(hour=23, minute=59, second=59)
+        days_labels.append(d.strftime('%d %b'))
+        days_data.append(round(sum(o.total_price for o in orders if ds <= o.created_at <= de), 2))
+    prod_rev = defaultdict(float)
+    cat_rev  = defaultdict(float)
+    for o in orders:
+        for item in o.items:
+            nm  = item.product.name if item.product else 'N/A'
+            cat = (item.product.category if item.product else None) or 'Boshqa'
+            v = (item.unit_price or 0) * (item.qty or 1)
+            prod_rev[nm] += v
+            cat_rev[cat] += v
+    top_prods = sorted(prod_rev.items(), key=lambda x: x[1], reverse=True)[:8]
+    status_c = defaultdict(int)
+    for o in orders:
+        status_c[o.status or 'Yangi'] += 1
+    return render_template('analytics.html',
+        month_revenue=round(month_revenue, 2),
+        month_profit=round(month_revenue * 0.25, 2),
+        month_orders=len(this_month),
+        total_orders=len(orders),
+        total_clients=_cq().count(),
+        lm_rev=round(lm_rev, 2),
+        days_labels=days_labels,
+        days_data=days_data,
+        top_prods=top_prods,
+        status_counts=dict(status_c),
+        cat_rev=dict(cat_rev),
+    )
+
+
+@app.route('/finance')
+@login_required
+def finance():
+    import calendar
+    from datetime import datetime, timedelta
+    from collections import defaultdict
+    today = datetime.utcnow()
+    orders = _oq().order_by(Order.created_at.desc()).all()
+    monthly = []
+    for i in range(5, -1, -1):
+        raw = today.month - i
+        y = today.year + (raw - 1) // 12
+        m = ((raw - 1) % 12) + 1
+        ms = datetime(y, m, 1)
+        _, ld = calendar.monthrange(y, m)
+        me = datetime(y, m, ld, 23, 59, 59)
+        mo = [o for o in orders if ms <= o.created_at <= me]
+        rev = sum(o.total_price for o in mo)
+        monthly.append({'month': ms.strftime('%B %Y'), 'short': ms.strftime('%b %y'),
+                        'revenue': round(rev, 2), 'profit': round(rev * 0.25, 2), 'orders': len(mo)})
+    cur = monthly[-1]
+    goal = 1000
+    progress = min(100, int(cur['revenue'] / goal * 100)) if goal else 0
+    cl_rev = defaultdict(float)
+    for o in orders:
+        if o.client:
+            cl_rev[o.client.full_name] += o.total_price
+    top_clients = sorted(cl_rev.items(), key=lambda x: x[1], reverse=True)[:5]
+    total_rev = round(sum(o.total_price for o in orders), 2)
+    return render_template('finance.html',
+        monthly=monthly, current=cur, goal=goal, progress=progress,
+        top_clients=top_clients,
+        total_revenue=total_rev, total_profit=round(total_rev * 0.25, 2),
+        total_orders=len(orders),
+    )
+
+
 @app.route('/napitki')
 @login_required
 def napitki():

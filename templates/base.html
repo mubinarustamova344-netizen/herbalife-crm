@@ -53,14 +53,14 @@
       <i class="bi bi-box-seam-fill"></i> Mahsulotlar
     </a>
 
-    <a href="{{ url_for('napitki') }}"
-       class="{% if request.endpoint == 'napitki' %}active{% endif %}">
-      <i class="bi bi-cup-hot-fill"></i> Kokteylar & Ichimliklar
+    <a href="{{ url_for('analytics') }}"
+       class="{% if request.endpoint == 'analytics' %}active{% endif %}">
+      <i class="bi bi-bar-chart-line-fill"></i> Savdo Analitikasi
     </a>
 
-    <a href="{{ url_for('catalog_print') }}"
-       class="{% if request.endpoint == 'catalog_print' %}active{% endif %}">
-      <i class="bi bi-file-earmark-pdf-fill"></i> Katalog (Chop etish)
+    <a href="{{ url_for('finance') }}"
+       class="{% if request.endpoint == 'finance' %}active{% endif %}">
+      <i class="bi bi-cash-coin"></i> Moliya & Daromad
     </a>
 
     <div class="sidebar-section-title" style="margin-top:8px">Marketing</div>
