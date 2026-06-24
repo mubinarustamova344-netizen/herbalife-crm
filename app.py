@@ -28,54 +28,55 @@ COMMISSION_PCT = 25
 
 # CDN URLs — to'g'ridan-to'g'ri tashqi manzillar (Railway uchun)
 _CDN = 'https://cdn11.bigcommerce.com/s-yyr3tzu8q0/images/stencil/728x728/products'
+_P   = 'https://cdn11.bigcommerce.com/s-yyr3tzu8q0/products'  # direct products CDN
 _S   = '/static/images/products'   # local SVG fallbacks (committed to git)
 
 PRODUCT_CDN_IMAGES = {
     # ── Formula 1 ─────────────────────────────────────────────────────────────
     'Formula 1 Шоколад':          f'{_CDN}/112/1092/herbalife-formula1-smooth-chocolate-550g-tub__69257.1760112844.jpg?c=2',
-    'Formula 1 Нежный Шоколад':   f'{_S}/f1_choc_soft.svg',
+    'Formula 1 Нежный Шоколад':   f'{_CDN}/112/1092/herbalife-formula1-smooth-chocolate-550g-tub__69257.1760112844.jpg?c=2',
     'Formula 1 Ваниль':           f'{_CDN}/160/992/herbalife-formula1-vanilla-cream-780g-tub__40073.1756481225.jpg?c=2',
     'Formula 1 Клубника':         f'{_CDN}/115/989/herbalife-formula1-healthy-meal-nutritional-shake-strawberry-delight-550g-container__22723.1756456788.jpg?c=2',
     'Formula 1 Лесной Орех':      f'{_CDN}/126/1001/herbalife-formula1-healthy-meal-nutritional-shake-mint-and-chocolate-550g-container__97767.1760368011.jpg?c=2',
     'Formula 1 Кокос':            f'{_S}/f1_coconut.svg',
     'Formula 1 Манго':            f'{_S}/f1_mango.svg',
     'Formula 1 Дыня':             f'{_S}/f1_melon.svg',
-    'Formula 1 Банан-Карамель':   f'{_S}/f1_banana.svg',
-    'Formula 1 Хрустящее Печенье':f'{_S}/f1_cookie.svg',
+    'Formula 1 Банан-Карамель':   f'{_P}/117/images/1102/herbalife-formula1-healthy-meal-nutritional-shake-banana-cream-550g-container__63785.1760371631.386.513.jpg?c=2',
+    'Formula 1 Хрустящее Печенье':f'{_P}/116/images/1203/herbalife-formula-1-healthy-meal-cookie-crunch-550g__04821.1782295676.386.513.webp?c=2',
     'Formula 1 Курица-Крем-Суп':  f'{_S}/f1_soup.svg',
-    'Formula 1 Найт Мод':         f'{_S}/f1_night.svg',
+    'Formula 1 Найт Мод':         f'{_P}/194/images/1142/hebalife-night-mode-chamomile-and-peach-180g-tub__15632.1765034854.386.513.jpg?c=2',
     'Formula 1 Vega':             f'{_CDN}/154/895/pc-2600-gb-ie-ic.png-pdp-w875h783__05483__68310.1760537301.jpg?c=2',
     'Протеиновый Коктейль':       f'{_CDN}/154/888/pp-pdm-emea.jpg-pdp-w875h783__55053.1760537301.jpg?c=2',
     # ── Napitki ───────────────────────────────────────────────────────────────
     'Чай НРГ Лимон-Имбирь':      f'{_CDN}/149/1076/herbalife-instant-herbal-beverage-with-tea-extracts-lemon-flavour-51g-container__51157.1758441060.jpg?c=2',
     'Чай НРГ Малина':             f'{_CDN}/148/1073/herbalife-instant-herbal-beverage-rasperry-flavour-bottle__17428.1758294813.jpg?c=2',
-    'Чай НРГ Персик':             f'{_S}/nrg_peach.svg',
+    'Чай НРГ Персик':             f'{_P}/150/images/780/Instant_Herbal_Beverage_Peach_51g__08908.1705663662.386.513.png?c=2',
     'Чай НРГ Манго-Питахайя':     f'{_S}/nrg_mango.svg',
     'Чай НРГ Чёрная Смородина':   f'{_S}/nrg_black.svg',
     'CR7 Drive':                  f'{_CDN}/183/984/herbalife24-cr7-drive-cannister-acai-berry-flavour-tub__52720.1751969190.jpg?c=2',
     'Алоэ Вера Концентрат':       f'{_CDN}/166/631/1065-aloe-concentrate-aloe-mango-473ml_-_Bottle__83104.1705400368.png?c=2',
-    'Алоэ Вера Манго':            f'{_S}/aloe_mango.svg',
+    'Алоэ Вера Манго':            f'{_P}/166/images/631/1065-aloe-concentrate-aloe-mango-473ml_-_Bottle__83104.1705400368.386.513.png?c=2',
     'Мангостин-Малина Напиток':   f'{_S}/mangostin.svg',
     # ── Sport H24 ─────────────────────────────────────────────────────────────
-    'H24 Achieve':                f'{_S}/h24_achieve.svg',
-    'H24 Prolong':                f'{_S}/h24_prolong.svg',
-    'H24 Rebuild Strength':       f'{_S}/h24_strength.svg',
-    'H24 Rebuild Endurance':      f'{_S}/h24_endurance.svg',
+    'H24 Achieve':                'https://herbaproducts.com/wp-content/uploads/2016/06/h24-hydrate-shadow.png',
+    'H24 Prolong':                'https://herbaproducts.com/wp-content/uploads/2016/06/h24-prolong-shadow.png',
+    'H24 Rebuild Strength':       f'{_P}/128/images/890/herbalife24-rebuild-strength__22062.1763037922.386.513.jpg?c=2',
+    'H24 Rebuild Endurance':      'https://herbaproducts.com/wp-content/uploads/2016/06/h24-endurance-shadow.png',
     # ── Vitaminlar ────────────────────────────────────────────────────────────
     'Formula 2 Мультивитамины':   'https://cdn11.bigcommerce.com/s-yyr3tzu8q0/images/stencil/532x532/products/113/401/Formula_2_-_Vitamin_and_Mineral_Complex_Womens_60_Tablets_-_Container__55652.1758111798.png?c=2',
     'Омега-3':                    f'{_CDN}/122/970/herbalife-herbalifeline-max-BOX__38280.1751640428.jpg?c=2',
     'Иммью Буст':                 f'{_CDN}/188/1140/herbalife-immune-booster-berry-flavour-box__72386.1761751718.jpg?c=2',
     'Термо Комплит':              f'{_CDN}/218/1166/herbalife-phyto-complete-sachet__86770.1767713545.1280.1280__18875.1767719966.jpg?c=2',
     'Витамин C 250мг':            f'{_S}/vitamin_c.svg',
-    'Кальций Плюс':               f'{_S}/calcium.svg',
-    'Формула 3 Протеин':          f'{_S}/formula3.svg',
+    'Кальций Плюс':               f'{_P}/136/images/487/Xtra-Cal_90_Tablets_-_Container__39368.1705484779.386.513.png?c=2',
+    'Формула 3 Протеин':          f'{_P}/155/images/1104/herbalife-formula3-personalised-protein-powder-tub__02533.1760447350.386.513.jpg?c=2',
     'Мультиминерал':              f'{_S}/multimineral.svg',
     # ── Krasota ───────────────────────────────────────────────────────────────
     'Skin Коллаген':              f'{_CDN}/199/861/Collagen_SKIN_Booster_strawberry_and_lemon_171g__28360.1704382807.png?c=2',
     'Коллаген Говяжий':           f'{_S}/collagen_beef.svg',
-    'Алоэ Гель для лица':         f'{_S}/aloe_face.svg',
-    'Гель для душа Алоэ':         f'{_S}/shower_gel.svg',
-    'Крем для рук':               f'{_S}/hand_cream.svg',
+    'Алоэ Гель для лица':         f'{_P}/179/images/688/Herbalife_SKIN_-_Soothing_Aloe_Cleanser__60157.1678208998.386.513.png?c=2',
+    'Гель для душа Алоэ':         f'{_P}/172/images/660/Herbal_Aloe_Hand_Body_Wash_-_250ml_Bottle__81675.1704616398.386.513.png?c=2',
+    'Крем для рук':               f'{_P}/186/images/745/Herbalife_SKIN_5_-_Daily_Glow_Moisturiser__71723.1704302888.386.513.png?c=2',
     # ── Dobavki ───────────────────────────────────────────────────────────────
     'Активная Клетчатка':         'https://cdn11.bigcommerce.com/s-yyr3tzu8q0/images/stencil/532x532/products/135/1047/herbalife-oat-apple-fibre-tub__82549.1757692511.jpg?c=2',
     'Пробиотик Комплекс':         f'{_S}/probiotic.svg',
