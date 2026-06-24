@@ -1,0 +1,61 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" width="400" height="400">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%"   stop-color="#880E4F"/>
+      <stop offset="100%" stop-color="#6A1B9A"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="50%" cy="38%" r="40%">
+      <stop offset="0%"   stop-color="rgba(255,255,255,0.25)"/>
+      <stop offset="100%" stop-color="rgba(255,255,255,0)"/>
+    </radialGradient>
+    <filter id="shadow">
+      <feDropShadow dx="0" dy="4" stdDeviation="8" flood-color="rgba(0,0,0,0.3)"/>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="400" height="400" rx="0" fill="url(#bg)"/>
+  <rect width="400" height="400" rx="0" fill="url(#glow)"/>
+
+  <!-- Decorative circles -->
+  <circle cx="380" cy="50"  r="140" fill="rgba(255,255,255,0.07)"/>
+  <circle cx="20"  cy="370" r="120" fill="rgba(255,255,255,0.05)"/>
+  <circle cx="200" cy="420" r="160" fill="rgba(0,0,0,0.10)"/>
+
+  <!-- Top accent line -->
+  <rect x="0" y="0" width="400" height="4" fill="rgba(255,255,255,0.4)"/>
+
+  <!-- Brand watermark -->
+  <text x="20" y="30" font-size="13" font-family="Arial, sans-serif"
+        fill="rgba(255,255,255,0.3)" font-weight="700" letter-spacing="1">HERBALIFE NUTRITION</text>
+
+  <!-- Product emoji circle bg -->
+  <circle cx="200" cy="170" r="90" fill="rgba(0,0,0,0.20)" filter="url(#shadow)"/>
+  <circle cx="200" cy="170" r="78" fill="rgba(255,255,255,0.12)"/>
+
+  <!-- Main emoji -->
+  <text x="200" y="196"
+        text-anchor="middle" dominant-baseline="middle"
+        font-size="72"
+        font-family="Segoe UI Emoji, Apple Color Emoji, Noto Color Emoji, sans-serif">🍇</text>
+
+  <!-- Product name -->
+  <text x="200" y="286"
+        text-anchor="middle"
+        font-size="22" font-weight="800" letter-spacing="0.2"
+        font-family="Arial Black, Arial, sans-serif" fill="#FFFFFF"
+        filter="url(#shadow)">Мангостин</text>
+
+  <!-- Subtitle / flavor -->
+  <text x="200" y="314"
+        text-anchor="middle"
+        font-size="15" font-family="Arial, sans-serif"
+        fill="rgba(255,255,255,0.75)" letter-spacing="0.5">Малина</text>
+
+  <!-- Bottom badge -->
+  <rect x="130" y="345" width="140" height="30" rx="15" fill="rgba(255,255,255,0.15)"/>
+  <text x="200" y="364"
+        text-anchor="middle"
+        font-size="9" letter-spacing="3" font-weight="700"
+        font-family="Arial, sans-serif" fill="rgba(255,255,255,0.65)">NUTRITION</text>
+</svg>

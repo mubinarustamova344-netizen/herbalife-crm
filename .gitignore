@@ -7,7 +7,5 @@ venv/
 *.db
 *.sqlite3
 .chat_id
-static/images/products/*.svg
-static/images/products/*.jpg
-static/images/products/*.png
+# product images are committed to repo
 .claude/

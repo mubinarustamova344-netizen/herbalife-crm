@@ -28,105 +28,61 @@ COMMISSION_PCT = 25
 
 # CDN URLs — to'g'ridan-to'g'ri tashqi manzillar (Railway uchun)
 _CDN = 'https://cdn11.bigcommerce.com/s-yyr3tzu8q0/images/stencil/728x728/products'
+_S   = '/static/images/products'   # local SVG fallbacks (committed to git)
+
 PRODUCT_CDN_IMAGES = {
-    # ── Formula 1 Kokteylar ──────────────────────────────────────────────────
-    'Formula 1 Шоколад':
-        f'{_CDN}/112/1092/herbalife-formula1-smooth-chocolate-550g-tub__69257.1760112844.jpg?c=2',
-    'Formula 1 Нежный Шоколад':
-        f'{_CDN}/112/1092/herbalife-formula1-smooth-chocolate-550g-tub__69257.1760112844.jpg?c=2',
-    'Formula 1 Ваниль':
-        f'{_CDN}/160/992/herbalife-formula1-vanilla-cream-780g-tub__40073.1756481225.jpg?c=2',
-    'Formula 1 Клубника':
-        f'{_CDN}/115/989/herbalife-formula1-healthy-meal-nutritional-shake-strawberry-delight-550g-container__22723.1756456788.jpg?c=2',
-    'Formula 1 Лесной Орех':
-        f'{_CDN}/126/1001/herbalife-formula1-healthy-meal-nutritional-shake-mint-and-chocolate-550g-container__97767.1760368011.jpg?c=2',
-    'Formula 1 Кокос':
-        'https://placehold.co/400x400/1a7a45/ffffff?text=F1+Кокос',
-    'Formula 1 Манго':
-        'https://placehold.co/400x400/f5a623/ffffff?text=F1+Манго',
-    'Formula 1 Дыня':
-        'https://placehold.co/400x400/f9d423/333333?text=F1+Дыня',
-    'Formula 1 Банан-Карамель':
-        'https://placehold.co/400x400/d4a017/ffffff?text=F1+Банан',
-    'Formula 1 Хрустящее Печенье':
-        'https://placehold.co/400x400/8B6914/ffffff?text=F1+Печенье',
-    'Formula 1 Курица-Крем-Суп':
-        'https://placehold.co/400x400/c8a96e/ffffff?text=F1+Суп',
-    'Formula 1 Найт Мод':
-        'https://placehold.co/400x400/1a1a2e/ffffff?text=F1+Night',
-    'Formula 1 Vega':
-        f'{_CDN}/154/895/pc-2600-gb-ie-ic.png-pdp-w875h783__05483__68310.1760537301.jpg?c=2',
-    'Протеиновый Коктейль':
-        f'{_CDN}/154/888/pp-pdm-emea.jpg-pdp-w875h783__55053.1760537301.jpg?c=2',
-    # ── Napitki ──────────────────────────────────────────────────────────────
-    'Чай НРГ Лимон-Имбирь':
-        f'{_CDN}/149/1076/herbalife-instant-herbal-beverage-with-tea-extracts-lemon-flavour-51g-container__51157.1758441060.jpg?c=2',
-    'Чай НРГ Малина':
-        f'{_CDN}/148/1073/herbalife-instant-herbal-beverage-rasperry-flavour-bottle__17428.1758294813.jpg?c=2',
-    'Чай НРГ Персик':
-        'https://placehold.co/400x400/f4a26b/ffffff?text=НРГ+Персик',
-    'Чай НРГ Манго-Питахайя':
-        'https://placehold.co/400x400/e040fb/ffffff?text=НРГ+Манго',
-    'Чай НРГ Чёрная Смородина':
-        'https://placehold.co/400x400/4a148c/ffffff?text=НРГ+Смород.',
-    'CR7 Drive':
-        f'{_CDN}/183/984/herbalife24-cr7-drive-cannister-acai-berry-flavour-tub__52720.1751969190.jpg?c=2',
-    'Алоэ Вера Концентрат':
-        f'{_CDN}/166/631/1065-aloe-concentrate-aloe-mango-473ml_-_Bottle__83104.1705400368.png?c=2',
-    'Алоэ Вера Манго':
-        'https://placehold.co/400x400/00897b/ffffff?text=Алоэ+Манго',
-    'Мангостин-Малина Напиток':
-        'https://placehold.co/400x400/880e4f/ffffff?text=Мангостин',
+    # ── Formula 1 ─────────────────────────────────────────────────────────────
+    'Formula 1 Шоколад':          f'{_CDN}/112/1092/herbalife-formula1-smooth-chocolate-550g-tub__69257.1760112844.jpg?c=2',
+    'Formula 1 Нежный Шоколад':   f'{_S}/f1_choc_soft.svg',
+    'Formula 1 Ваниль':           f'{_CDN}/160/992/herbalife-formula1-vanilla-cream-780g-tub__40073.1756481225.jpg?c=2',
+    'Formula 1 Клубника':         f'{_CDN}/115/989/herbalife-formula1-healthy-meal-nutritional-shake-strawberry-delight-550g-container__22723.1756456788.jpg?c=2',
+    'Formula 1 Лесной Орех':      f'{_CDN}/126/1001/herbalife-formula1-healthy-meal-nutritional-shake-mint-and-chocolate-550g-container__97767.1760368011.jpg?c=2',
+    'Formula 1 Кокос':            f'{_S}/f1_coconut.svg',
+    'Formula 1 Манго':            f'{_S}/f1_mango.svg',
+    'Formula 1 Дыня':             f'{_S}/f1_melon.svg',
+    'Formula 1 Банан-Карамель':   f'{_S}/f1_banana.svg',
+    'Formula 1 Хрустящее Печенье':f'{_S}/f1_cookie.svg',
+    'Formula 1 Курица-Крем-Суп':  f'{_S}/f1_soup.svg',
+    'Formula 1 Найт Мод':         f'{_S}/f1_night.svg',
+    'Formula 1 Vega':             f'{_CDN}/154/895/pc-2600-gb-ie-ic.png-pdp-w875h783__05483__68310.1760537301.jpg?c=2',
+    'Протеиновый Коктейль':       f'{_CDN}/154/888/pp-pdm-emea.jpg-pdp-w875h783__55053.1760537301.jpg?c=2',
+    # ── Napitki ───────────────────────────────────────────────────────────────
+    'Чай НРГ Лимон-Имбирь':      f'{_CDN}/149/1076/herbalife-instant-herbal-beverage-with-tea-extracts-lemon-flavour-51g-container__51157.1758441060.jpg?c=2',
+    'Чай НРГ Малина':             f'{_CDN}/148/1073/herbalife-instant-herbal-beverage-rasperry-flavour-bottle__17428.1758294813.jpg?c=2',
+    'Чай НРГ Персик':             f'{_S}/nrg_peach.svg',
+    'Чай НРГ Манго-Питахайя':     f'{_S}/nrg_mango.svg',
+    'Чай НРГ Чёрная Смородина':   f'{_S}/nrg_black.svg',
+    'CR7 Drive':                  f'{_CDN}/183/984/herbalife24-cr7-drive-cannister-acai-berry-flavour-tub__52720.1751969190.jpg?c=2',
+    'Алоэ Вера Концентрат':       f'{_CDN}/166/631/1065-aloe-concentrate-aloe-mango-473ml_-_Bottle__83104.1705400368.png?c=2',
+    'Алоэ Вера Манго':            f'{_S}/aloe_mango.svg',
+    'Мангостин-Малина Напиток':   f'{_S}/mangostin.svg',
     # ── Sport H24 ─────────────────────────────────────────────────────────────
-    'H24 Achieve':
-        'https://placehold.co/400x400/b71c1c/ffffff?text=H24+Achieve',
-    'H24 Prolong':
-        'https://placehold.co/400x400/1565c0/ffffff?text=H24+Prolong',
-    'H24 Rebuild Strength':
-        'https://placehold.co/400x400/1b5e20/ffffff?text=H24+Strength',
-    'H24 Rebuild Endurance':
-        'https://placehold.co/400x400/bf360c/ffffff?text=H24+Endurance',
+    'H24 Achieve':                f'{_S}/h24_achieve.svg',
+    'H24 Prolong':                f'{_S}/h24_prolong.svg',
+    'H24 Rebuild Strength':       f'{_S}/h24_strength.svg',
+    'H24 Rebuild Endurance':      f'{_S}/h24_endurance.svg',
     # ── Vitaminlar ────────────────────────────────────────────────────────────
-    'Formula 2 Мультивитамины':
-        'https://cdn11.bigcommerce.com/s-yyr3tzu8q0/images/stencil/532x532/products/113/401/Formula_2_-_Vitamin_and_Mineral_Complex_Womens_60_Tablets_-_Container__55652.1758111798.png?c=2',
-    'Омега-3':
-        f'{_CDN}/122/970/herbalife-herbalifeline-max-BOX__38280.1751640428.jpg?c=2',
-    'Иммью Буст':
-        f'{_CDN}/188/1140/herbalife-immune-booster-berry-flavour-box__72386.1761751718.jpg?c=2',
-    'Термо Комплит':
-        f'{_CDN}/218/1166/herbalife-phyto-complete-sachet__86770.1767713545.1280.1280__18875.1767719966.jpg?c=2',
-    'Витамин C 250мг':
-        'https://placehold.co/400x400/e65100/ffffff?text=Витамин+C',
-    'Кальций Плюс':
-        'https://placehold.co/400x400/90a4ae/333333?text=Кальций+D3',
-    'Формула 3 Протеин':
-        'https://placehold.co/400x400/2e7d32/ffffff?text=Formula+3',
-    'Мультиминерал':
-        'https://placehold.co/400x400/37474f/ffffff?text=Минералы',
+    'Formula 2 Мультивитамины':   'https://cdn11.bigcommerce.com/s-yyr3tzu8q0/images/stencil/532x532/products/113/401/Formula_2_-_Vitamin_and_Mineral_Complex_Womens_60_Tablets_-_Container__55652.1758111798.png?c=2',
+    'Омега-3':                    f'{_CDN}/122/970/herbalife-herbalifeline-max-BOX__38280.1751640428.jpg?c=2',
+    'Иммью Буст':                 f'{_CDN}/188/1140/herbalife-immune-booster-berry-flavour-box__72386.1761751718.jpg?c=2',
+    'Термо Комплит':              f'{_CDN}/218/1166/herbalife-phyto-complete-sachet__86770.1767713545.1280.1280__18875.1767719966.jpg?c=2',
+    'Витамин C 250мг':            f'{_S}/vitamin_c.svg',
+    'Кальций Плюс':               f'{_S}/calcium.svg',
+    'Формула 3 Протеин':          f'{_S}/formula3.svg',
+    'Мультиминерал':              f'{_S}/multimineral.svg',
     # ── Krasota ───────────────────────────────────────────────────────────────
-    'Skin Коллаген':
-        f'{_CDN}/199/861/Collagen_SKIN_Booster_strawberry_and_lemon_171g__28360.1704382807.png?c=2',
-    'Коллаген Говяжий':
-        'https://placehold.co/400x400/ad1457/ffffff?text=Коллаген',
-    'Алоэ Гель для лица':
-        'https://placehold.co/400x400/00838f/ffffff?text=Алоэ+Гель',
-    'Гель для душа Алоэ':
-        'https://placehold.co/400x400/006064/ffffff?text=Гель+душ',
-    'Крем для рук':
-        'https://placehold.co/400x400/c2185b/ffffff?text=Крем+рук',
+    'Skin Коллаген':              f'{_CDN}/199/861/Collagen_SKIN_Booster_strawberry_and_lemon_171g__28360.1704382807.png?c=2',
+    'Коллаген Говяжий':           f'{_S}/collagen_beef.svg',
+    'Алоэ Гель для лица':         f'{_S}/aloe_face.svg',
+    'Гель для душа Алоэ':         f'{_S}/shower_gel.svg',
+    'Крем для рук':               f'{_S}/hand_cream.svg',
     # ── Dobavki ───────────────────────────────────────────────────────────────
-    'Активная Клетчатка':
-        'https://cdn11.bigcommerce.com/s-yyr3tzu8q0/images/stencil/532x532/products/135/1047/herbalife-oat-apple-fibre-tub__82549.1757692511.jpg?c=2',
-    'Пробиотик Комплекс':
-        'https://placehold.co/400x400/6a1b9a/ffffff?text=Пробиотик',
-    'Л-Карнитин':
-        'https://placehold.co/400x400/283593/ffffff?text=L-Карнитин',
-    'BCAA Комплекс':
-        'https://placehold.co/400x400/0277bd/ffffff?text=BCAA',
-    'Глюкозамин Плюс':
-        'https://placehold.co/400x400/558b2f/ffffff?text=Глюкозамин',
-    'Детокс Чай 7 дней':
-        'https://placehold.co/400x400/00695c/ffffff?text=Детокс+7д',
+    'Активная Клетчатка':         'https://cdn11.bigcommerce.com/s-yyr3tzu8q0/images/stencil/532x532/products/135/1047/herbalife-oat-apple-fibre-tub__82549.1757692511.jpg?c=2',
+    'Пробиотик Комплекс':         f'{_S}/probiotic.svg',
+    'Л-Карнитин':                 f'{_S}/lcarnitine.svg',
+    'BCAA Комплекс':              f'{_S}/bcaa.svg',
+    'Глюкозамин Плюс':            f'{_S}/glucosamine.svg',
+    'Детокс Чай 7 дней':          f'{_S}/detox_tea.svg',
 }
 
 
@@ -1076,7 +1032,7 @@ if __name__ == '__main__':
         _download_real_images()
 
         # To'liq katalog — 46 ta mahsulot
-        if Product.query.count() < 20:
+        if Product.query.count() < 44:
             Product.query.delete()
             db.session.commit()
             demo = [
