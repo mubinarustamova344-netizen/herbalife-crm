@@ -559,23 +559,8 @@ VIDI = ['Шоколадные', 'Фруктово-ягодные', 'Нейтра
 @app.route('/products')
 @login_required
 def products():
-    cat   = request.args.get('cat', '').strip()
-    vid   = request.args.get('vid', '').strip()
-    direc = request.args.get('dir', '').strip()
-    query = Product.query.order_by(Product.category, Product.name)
-    if cat:
-        query = query.filter_by(category=cat)
-    if vid:
-        query = query.filter_by(vid=vid)
-    all_products = query.all()
-    if direc:
-        all_products = [p for p in all_products if direc in (p.direction or '')]
-    categories = sorted(set(p.category for p in Product.query.all() if p.category))
-    return render_template('products.html',
-        products=all_products, categories=categories,
-        cat=cat, vid=vid, direc=direc,
-        directions=DIRECTIONS, vidi=VIDI,
-    )
+    all_products = Product.query.order_by(Product.category, Product.name).all()
+    return render_template('products.html', products=all_products)
 
 
 def _product_from_form(p):

@@ -1,496 +1,605 @@
 {% extends 'base.html' %}
-{% block title %}Mahsulotlar — Herbalife CRM{% endblock %}
+{% block title %}Mahsulotlar Katalogi — Herbalife CRM{% endblock %}
 {% block topbar_title %}<i class="bi bi-box-seam-fill me-2 text-success"></i>Mahsulotlar Katalogi{% endblock %}
 
 {% block content %}
+{% set cocktails   = products | selectattr('category','equalto','Коктейль') | list %}
+{% set drinks      = products | selectattr('category','equalto','Напиток')   | list %}
+{% set beauty_list = products | selectattr('category','equalto','Красота')   | list %}
+{% set sport_list  = products | selectattr('category','equalto','Спорт')     | list %}
+{% set vit_list    = products | selectattr('category','equalto','Витамины')  | list %}
+{% set supp_list   = products | selectattr('category','equalto','Добавки')   | list %}
+
+{% set NEW_NAMES = [
+  'Formula 1 Кокос','Formula 1 Манго','Formula 1 Дыня','Formula 1 Найт Мод',
+  'Formula 1 Банан-Карамель','Formula 1 Хрустящее Печенье','Formula 1 Курица-Крем-Суп',
+  'Чай НРГ Манго-Питахайя','Чай НРГ Персик','Чай НРГ Чёрная Смородина',
+  'H24 Achieve','H24 Prolong','H24 Rebuild Strength','H24 Rebuild Endurance',
+] %}
+
+{% set F1C = {
+  'Formula 1 Шоколад':'#3E2723', 'Formula 1 Нежный Шоколад':'#5D4037',
+  'Formula 1 Ваниль':'#795548',  'Formula 1 Клубника':'#880E4F',
+  'Formula 1 Лесной Орех':'#4E342E', 'Formula 1 Кокос':'#004D40',
+  'Formula 1 Манго':'#E65100',   'Formula 1 Дыня':'#F57F17',
+  'Formula 1 Банан-Карамель':'#FF8F00', 'Formula 1 Хрустящее Печенье':'#6D4C41',
+  'Formula 1 Курица-Крем-Суп':'#827717','Formula 1 Найт Мод':'#1A237E',
+  'Formula 1 Vega':'#1B5E20',    'Протеиновый Коктейль':'#0D47A1',
+} %}
+
+{% set DRC = {
+  'Чай НРГ Лимон-Имбирь':'#F9A825','Чай НРГ Малина':'#C2185B',
+  'Чай НРГ Персик':'#FF7043',      'Чай НРГ Манго-Питахайя':'#7B1FA2',
+  'Чай НРГ Чёрная Смородина':'#4527A0','CR7 Drive':'#E64A19',
+  'Алоэ Вера Концентрат':'#2E7D32','Алоэ Вера Манго':'#00796B',
+  'Мангостин-Малина Напиток':'#880E4F',
+} %}
+
 <style>
-/* ── Catalog layout ─────────────────────────────────────────────── */
-.catalog-wrap { display:flex; gap:28px; align-items:flex-start; }
+/* ── PAGE SHELL ──────────────────────────────────────── */
+.cat-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
+.cat-hdr-title{font-size:1.3rem;font-weight:800;color:#1a2a1e}
+.cat-pills{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:28px}
+.cat-pill{
+  padding:8px 18px;border-radius:20px;font-size:.78rem;font-weight:700;
+  text-decoration:none;border:2px solid #e0ece5;color:#2e7d52;background:#fff;
+  transition:.15s;white-space:nowrap
+}
+.cat-pill:hover{background:#00723F;color:#fff;border-color:#00723F}
 
-/* SIDEBAR */
-.cat-sidebar {
-  width:260px; flex-shrink:0;
-  background:#fff; border-radius:16px;
-  border:1px solid #e8f0eb;
-  padding:0; overflow:hidden;
-  position:sticky; top:80px;
+/* ── FORMULA 1 HERO ─────────────────────────────────── */
+.f1-hero{
+  --fa:#2E7D32;
+  border-radius:24px;overflow:hidden;
+  background:linear-gradient(145deg,#050f08,#0f2c18,#040d07);
+  margin-bottom:32px;position:relative;
 }
-.cat-sidebar-head {
-  padding:16px 20px;
-  background:#f5faf7;
-  border-bottom:1px solid #e8f0eb;
-  font-size:.78rem; font-weight:700;
-  letter-spacing:.8px; color:#2e7d52;
-  text-transform:uppercase;
-  display:flex; align-items:center; gap:8px;
+.f1-hero::after{
+  content:'';position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(ellipse 55% 80% at 75% 50%, var(--fa), transparent 70%);
+  opacity:.14;transition:background .45s;
 }
-.filter-section { border-bottom:1px solid #f0f4f2; }
-.filter-section:last-child { border-bottom:none; }
-.filter-section-title {
-  padding:14px 20px;
-  font-size:.82rem; font-weight:700; color:#1a3a2a;
-  cursor:pointer;
-  display:flex; justify-content:space-between; align-items:center;
-  user-select:none;
-  transition:.15s;
-}
-.filter-section-title:hover { background:#f8fdf9; }
-.filter-section-title i { color:#aaa; font-size:.7rem; transition:.2s; }
-.filter-section-title.open i { transform:rotate(180deg); color:#00723F; }
-.filter-section-body { padding:4px 12px 14px; }
-.filter-check {
-  display:flex; align-items:center; gap:10px;
-  padding:7px 8px; border-radius:10px;
-  cursor:pointer; transition:.12s;
-  font-size:.83rem; color:#333;
-  text-decoration:none;
-}
-.filter-check:hover { background:#f0faf5; color:#00723F; }
-.filter-check.active { color:#00723F; font-weight:700; background:#ebf7f1; }
-.filter-check .fcheck-box {
-  width:16px; height:16px; border-radius:4px;
-  border:2px solid #ccc; flex-shrink:0;
-  display:flex; align-items:center; justify-content:center;
-  transition:.12s;
-}
-.filter-check.active .fcheck-box {
-  background:#00723F; border-color:#00723F;
-}
-.filter-check.active .fcheck-box::after {
-  content:'✓'; color:#fff; font-size:10px; font-weight:900;
-}
-.clear-filter {
-  display:block; margin:8px 12px 0;
-  font-size:.75rem; color:#00723F; text-decoration:none;
-  opacity:.7;
-}
-.clear-filter:hover { opacity:1; }
+.f1-inner{display:grid;grid-template-columns:260px 1fr;position:relative;z-index:1;min-height:460px}
 
-/* MAIN */
-.cat-main { flex:1; min-width:0; }
-.cat-top-bar {
-  display:flex; align-items:center; justify-content:space-between;
-  margin-bottom:20px; flex-wrap:wrap; gap:10px;
+/* tabs */
+.f1-left{padding:28px 20px;border-right:1px solid rgba(255,255,255,.07);display:flex;flex-direction:column}
+.f1-brand{font-size:.65rem;font-weight:800;letter-spacing:3px;color:#00ee77;margin-bottom:2px}
+.f1-heading{font-size:1.5rem;font-weight:900;color:#fff;margin-bottom:18px;line-height:1.1}
+.f1-tabs{display:flex;flex-direction:column;gap:4px;overflow-y:auto;flex:1;
+  scrollbar-width:thin;scrollbar-color:rgba(0,238,119,.25) transparent}
+.f1-tab{
+  background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);
+  color:rgba(255,255,255,.7);border-radius:10px;padding:8px 12px;
+  cursor:pointer;text-align:left;font-size:.79rem;font-weight:600;
+  transition:.13s;display:flex;align-items:center;justify-content:space-between;gap:8px
 }
-.cat-count { font-size:.88rem; color:#666; }
-.cat-count strong { color:#1a3a2a; }
-.cat-sort {
-  display:flex; align-items:center; gap:8px;
-  font-size:.82rem; color:#555;
-}
-.cat-sort select {
-  border:1px solid #dde8e2; border-radius:10px;
-  padding:7px 14px; font-size:.82rem; color:#333;
-  background:#fff; cursor:pointer; outline:none;
-}
+.f1-tab:hover{background:rgba(0,238,119,.07);color:#fff;border-color:rgba(0,238,119,.25)}
+.f1-tab.active{background:rgba(0,238,119,.14);border-color:#00ee77;color:#00ee77;
+  box-shadow:0 2px 10px rgba(0,238,119,.12)}
+.tab-new{font-size:.55rem;background:#00ee77;color:#000;border-radius:5px;
+  padding:2px 5px;font-weight:900;letter-spacing:.4px;flex-shrink:0}
 
-/* PRODUCT CARDS */
-.prod-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(210px,1fr)); gap:18px; }
+/* right panel */
+.f1-right{padding:40px 36px 32px;display:flex;align-items:center;gap:36px}
+.f1-imgwrap{
+  flex-shrink:0;width:210px;height:250px;
+  display:flex;align-items:center;justify-content:center;
+  filter:drop-shadow(0 20px 50px rgba(0,0,0,.55));
+  transition:opacity .2s,transform .2s
+}
+.f1-imgwrap img{max-width:100%;max-height:100%;object-fit:contain}
+.f1-imgwrap.fade{opacity:0;transform:scale(.9)}
+.f1-info{flex:1}
+.f1-info-label{font-size:.65rem;font-weight:700;letter-spacing:2px;
+  color:#00ee77;text-transform:uppercase;margin-bottom:6px}
+.f1-info-name{font-size:1.65rem;font-weight:900;color:#fff;line-height:1.2;margin-bottom:8px}
+.f1-info-desc{font-size:.84rem;color:rgba(255,255,255,.58);line-height:1.65;margin-bottom:12px}
+.f1-info-sostav{font-size:.73rem;color:rgba(255,255,255,.35);line-height:1.5;
+  border-left:2px solid rgba(0,238,119,.25);padding-left:12px;margin-bottom:20px}
+.f1-price-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:20px}
+.f1-price{font-size:2rem;font-weight:900;color:#fff}
+.f1-badge{border-radius:8px;padding:5px 12px;font-size:.72rem;font-weight:700}
+.f1-badge.green{background:rgba(0,238,119,.12);color:#00ee77;border:1px solid rgba(0,238,119,.28)}
+.f1-badge.gray{background:rgba(255,255,255,.07);color:rgba(255,255,255,.5)}
+.f1-actions{display:flex;gap:10px}
+.f1-sell{
+  background:linear-gradient(135deg,#00ee77,#00b359);color:#000;
+  font-weight:800;font-size:.88rem;border-radius:12px;padding:12px 26px;
+  text-decoration:none;display:inline-flex;align-items:center;gap:8px;
+  box-shadow:0 4px 22px rgba(0,238,119,.3);transition:.15s
+}
+.f1-sell:hover{transform:translateY(-2px);box-shadow:0 8px 30px rgba(0,238,119,.4);color:#000}
+.f1-edit{
+  background:rgba(255,255,255,.07);color:rgba(255,255,255,.65);
+  border:1px solid rgba(255,255,255,.14);border-radius:12px;
+  width:46px;height:46px;display:inline-flex;align-items:center;justify-content:center;
+  text-decoration:none;font-size:.95rem;transition:.15s
+}
+.f1-edit:hover{background:rgba(255,255,255,.14);color:#fff}
 
-.pcard {
-  background:#fff;
-  border:1px solid #e8f0eb;
-  border-radius:18px;
-  overflow:hidden;
-  transition:.18s;
-  display:flex; flex-direction:column;
-  position:relative;
+/* ── DRINKS SHOWCASE ─────────────────────────────────── */
+.sec-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.sec-title{font-size:1.05rem;font-weight:800;color:#1a2a1e}
+.sec-sub{font-size:.76rem;color:#888;margin-top:2px}
+.sec-badge{background:#e8f7ee;color:#1e7a3e;border-radius:20px;padding:4px 12px;
+  font-size:.74rem;font-weight:700}
+.drinks-section{margin-bottom:32px}
+.drinks-row{
+  display:flex;gap:12px;overflow-x:auto;padding-bottom:8px;
+  scrollbar-width:thin;scrollbar-color:#b2d8c0 transparent
 }
-.pcard:hover {
-  border-color:#b2d8c0;
-  box-shadow:0 8px 28px rgba(0,114,63,.10);
-  transform:translateY(-3px);
+.dcard{
+  --dc:#1a7a45;flex-shrink:0;width:155px;border-radius:18px;overflow:hidden;
+  background:#fff;border:1px solid #e8f0eb;transition:.18s
 }
+.dcard:hover{transform:translateY(-4px);box-shadow:0 10px 28px rgba(0,0,0,.1)}
+.dcard-top{
+  height:125px;display:flex;align-items:center;justify-content:center;
+  background:linear-gradient(160deg,var(--dc) 0%,color-mix(in srgb,var(--dc) 55%,#000) 100%);
+  padding:10px;overflow:hidden;position:relative
+}
+.dcard-top::after{content:'';position:absolute;bottom:-16px;left:-16px;right:-16px;
+  height:40px;background:rgba(255,255,255,.07);border-radius:50%}
+.dcard-top img{max-width:75px;max-height:95px;object-fit:contain;
+  filter:drop-shadow(0 4px 14px rgba(0,0,0,.4));position:relative;z-index:1}
+.dcard-body{padding:11px}
+.dcard-name{font-size:.74rem;font-weight:700;color:#1a2a1e;line-height:1.3;margin-bottom:4px}
+.dcard-price{font-size:.84rem;font-weight:800;color:#00723F;margin-bottom:8px}
+.dcard-sell{
+  display:block;background:var(--dc);color:#fff;text-align:center;
+  border-radius:8px;padding:6px 0;font-size:.7rem;font-weight:700;
+  text-decoration:none;transition:.15s
+}
+.dcard-sell:hover{filter:brightness(1.15);color:#fff}
 
-/* image area */
-.pcard-img {
-  height:200px;
-  display:flex; align-items:center; justify-content:center;
-  background:#f8fcf9;
-  border-bottom:1px solid #f0f5f2;
-  position:relative; overflow:hidden;
-  padding:16px;
+/* ── BEAUTY SECTION ─────────────────────────────────── */
+.beauty-section{
+  margin-bottom:32px;border-radius:24px;overflow:hidden;
+  background:linear-gradient(135deg,#fce4ec 0%,#f8bbd0 45%,#fde7f2 100%);
+  padding:32px 32px 28px
 }
-.pcard-img img {
-  max-width:100%; max-height:168px;
-  object-fit:contain;
-  transition:.2s;
+.beauty-hdr{margin-bottom:24px}
+.beauty-title{font-size:1.5rem;font-weight:900;color:#880e4f;
+  display:flex;align-items:center;gap:10px}
+.beauty-sub{color:#ad1457;font-size:.82rem;margin-top:4px;opacity:.8}
+.beauty-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(175px,1fr));gap:16px}
+.bcard{
+  background:rgba(255,255,255,.82);border:1px solid rgba(194,24,91,.14);
+  border-radius:18px;overflow:hidden;transition:.18s;backdrop-filter:blur(8px)
 }
-.pcard:hover .pcard-img img { transform:scale(1.04); }
-.pcard-img .pcard-emoji {
-  font-size:72px; line-height:1;
+.bcard:hover{transform:translateY(-4px);box-shadow:0 12px 36px rgba(194,24,91,.14);
+  border-color:rgba(194,24,91,.28)}
+.bcard-img{height:160px;display:flex;align-items:center;justify-content:center;
+  background:linear-gradient(160deg,rgba(194,24,91,.05),rgba(252,228,236,.45));padding:14px}
+.bcard-img img{max-width:100%;max-height:135px;object-fit:contain;transition:.22s}
+.bcard:hover .bcard-img img{transform:scale(1.06)}
+.bcard-body{padding:13px}
+.bcard-name{font-size:.83rem;font-weight:700;color:#1a0a10;margin-bottom:3px;line-height:1.3}
+.bcard-desc{font-size:.7rem;color:#880e4f;opacity:.7;margin-bottom:7px;line-height:1.4}
+.bcard-price{font-size:.98rem;font-weight:800;color:#880e4f;margin-bottom:9px}
+.bcard-sell{
+  display:flex;align-items:center;justify-content:center;gap:6px;
+  background:linear-gradient(135deg,#e91e63,#ad1457);color:#fff;
+  border-radius:10px;padding:8px 0;font-size:.74rem;font-weight:700;
+  text-decoration:none;transition:.15s
 }
+.bcard-sell:hover{box-shadow:0 4px 16px rgba(233,30,99,.3);color:#fff;transform:translateY(-1px)}
 
-/* badges on image */
-.pcard-badge-row {
-  position:absolute; top:10px; left:10px; right:10px;
-  display:flex; justify-content:space-between; align-items:flex-start;
+/* ── SPORT H24 ──────────────────────────────────────── */
+.sport-section{
+  margin-bottom:32px;border-radius:22px;overflow:hidden;
+  background:linear-gradient(135deg,#0d1b2a,#1a3a5c,#0a1520);
+  padding:28px 32px
 }
-.pcard-stock {
-  font-size:.68rem; font-weight:700; border-radius:8px;
-  padding:3px 8px; line-height:1.3;
+.sport-title{font-size:1.25rem;font-weight:900;color:#fff;
+  display:flex;align-items:center;gap:10px;margin-bottom:4px}
+.sport-sub{color:rgba(255,255,255,.45);font-size:.78rem;margin-bottom:20px}
+.sport-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(175px,1fr));gap:14px}
+.spcard{
+  background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);
+  border-radius:16px;overflow:hidden;transition:.18s
 }
-.pcard-stock.ok   { background:#e8f7ee; color:#1e7a3e; }
-.pcard-stock.low  { background:#fff8e1; color:#e65100; }
-.pcard-stock.out  { background:#fce8e8; color:#c62828; }
+.spcard:hover{background:rgba(255,255,255,.09);border-color:rgba(255,255,255,.22);transform:translateY(-3px)}
+.spcard-img{height:135px;display:flex;align-items:center;justify-content:center;padding:12px}
+.spcard-img img{max-width:100%;max-height:115px;object-fit:contain}
+.spcard-body{padding:12px}
+.spcard-name{font-size:.81rem;font-weight:700;color:#fff;margin-bottom:3px}
+.spcard-desc{font-size:.68rem;color:rgba(255,255,255,.42);margin-bottom:7px;line-height:1.4}
+.spcard-price{font-size:.92rem;font-weight:800;color:#64b5f6;margin-bottom:8px}
+.spcard-sell{
+  display:block;background:rgba(100,181,246,.13);color:#64b5f6;
+  border:1px solid rgba(100,181,246,.28);border-radius:8px;
+  text-align:center;padding:6px 0;font-size:.7rem;font-weight:700;
+  text-decoration:none;transition:.15s
+}
+.spcard-sell:hover{background:#64b5f6;color:#000}
 
-.pcard-vid {
-  font-size:.62rem; font-weight:700; border-radius:8px;
-  padding:3px 8px; background:rgba(255,255,255,.9);
-  color:#00723F; border:1px solid #b2d8c0;
+/* ── GENERAL GRID (vitamins / supps) ─────────────────── */
+.grid-sec{margin-bottom:32px}
+.grid-sec-hdr{
+  display:flex;align-items:center;gap:12px;margin-bottom:16px;
+  padding-bottom:12px;border-bottom:2px solid #e8f0eb
 }
-
-/* body */
-.pcard-body { padding:16px; flex:1; display:flex; flex-direction:column; gap:8px; }
-.pcard-cat  { font-size:.68rem; font-weight:700; color:#00723F; letter-spacing:.5px; text-transform:uppercase; }
-.pcard-name { font-size:.92rem; font-weight:700; color:#1a2a1e; line-height:1.35; }
-.pcard-desc { font-size:.75rem; color:#778f80; line-height:1.5; flex:1; }
-
-.pcard-dirs { display:flex; flex-wrap:wrap; gap:4px; }
-.pcard-dir-chip {
-  font-size:.62rem; background:#f0faf5; color:#2e7d52;
-  border-radius:6px; padding:2px 7px; font-weight:600;
+.grid-sec-icon{width:40px;height:40px;border-radius:12px;
+  display:flex;align-items:center;justify-content:center;font-size:1.1rem}
+.icon-vit{background:#fff8e1}
+.icon-sup{background:#e8f5e9}
+.grid-sec-title{font-size:.98rem;font-weight:800;color:#1a2a1e}
+.grid-sec-cnt{font-size:.74rem;color:#888;margin-top:2px}
+.prod-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(195px,1fr));gap:16px}
+.pcard{background:#fff;border:1px solid #e8f0eb;border-radius:18px;
+  overflow:hidden;transition:.18s;display:flex;flex-direction:column}
+.pcard:hover{border-color:#b2d8c0;box-shadow:0 8px 28px rgba(0,114,63,.1);transform:translateY(-3px)}
+.pcard-img{height:175px;display:flex;align-items:center;justify-content:center;
+  background:#f8fcf9;border-bottom:1px solid #f0f5f2;padding:14px;
+  position:relative;overflow:hidden}
+.pcard-img img{max-width:100%;max-height:148px;object-fit:contain;transition:.2s}
+.pcard:hover .pcard-img img{transform:scale(1.05)}
+.pcard-emoji{font-size:56px;line-height:1}
+.pcard-badges{position:absolute;top:8px;left:8px;right:8px;display:flex;justify-content:space-between}
+.pstock{font-size:.64rem;font-weight:700;border-radius:7px;padding:3px 7px}
+.pstock.ok{background:#e8f7ee;color:#1e7a3e}
+.pstock.low{background:#fff8e1;color:#e65100}
+.pstock.out{background:#fce8e8;color:#c62828}
+.pcard-body{padding:13px;flex:1;display:flex;flex-direction:column;gap:5px}
+.pcard-cat{font-size:.63rem;font-weight:700;color:#00723F;letter-spacing:.5px;text-transform:uppercase}
+.pcard-name{font-size:.87rem;font-weight:700;color:#1a2a1e;line-height:1.3}
+.pcard-desc{font-size:.71rem;color:#778f80;flex:1;line-height:1.45}
+.pcard-pr{display:flex;align-items:flex-end;justify-content:space-between;
+  padding-top:7px;border-top:1px solid #f0f5f2;margin-top:auto}
+.pcard-price{font-size:1.02rem;font-weight:800;color:#1a2a1e}
+.pmarg{font-size:.64rem;font-weight:700;border-radius:7px;padding:3px 7px}
+.pmarg.g{background:#e8f7ee;color:#1e7a3e}
+.pmarg.o{background:#fff8e1;color:#b45309}
+.pcard-acts{display:flex;gap:5px;padding:0 13px 12px}
+.btn-sell{
+  flex:1;background:#00723F;color:#fff;border:none;border-radius:9px;
+  padding:8px 0;font-size:.74rem;font-weight:700;cursor:pointer;
+  transition:.15s;text-decoration:none;text-align:center;
+  display:flex;align-items:center;justify-content:center;gap:5px
 }
-
-/* price row */
-.pcard-price-row {
-  display:flex; align-items:flex-end; justify-content:space-between;
-  padding-top:8px; border-top:1px solid #f0f5f2; margin-top:auto;
+.btn-sell:hover{background:#005530;color:#fff}
+.btn-sell.dis{opacity:.4;pointer-events:none}
+.btn-ico{
+  width:33px;height:33px;border-radius:9px;border:1px solid #dde8e2;background:#fff;
+  display:flex;align-items:center;justify-content:center;
+  color:#555;font-size:.8rem;cursor:pointer;transition:.15s;text-decoration:none
 }
-.pcard-price { font-size:1.15rem; font-weight:800; color:#1a2a1e; }
-.pcard-cost  { font-size:.7rem; color:#aaa; }
-.pcard-margin {
-  font-size:.7rem; font-weight:700; border-radius:8px;
-  padding:3px 8px;
-}
-.pcard-margin.good { background:#e8f7ee; color:#1e7a3e; }
-.pcard-margin.ok   { background:#fff8e1; color:#b45309; }
+.btn-ico:hover{border-color:#00723F;color:#00723F}
+.btn-ico.d:hover{border-color:#dc3545;color:#dc3545}
 
-/* actions */
-.pcard-actions {
-  display:flex; gap:6px; padding:0 16px 14px;
+@media(max-width:880px){
+  .f1-inner{grid-template-columns:1fr}
+  .f1-left{border-right:none;border-bottom:1px solid rgba(255,255,255,.07)}
+  .f1-tabs{flex-direction:row;overflow-x:auto;overflow-y:visible}
+  .f1-tab{flex-shrink:0}
+  .f1-right{flex-direction:column;padding:24px;align-items:center;text-align:center}
+  .f1-actions{justify-content:center}
 }
-.pcard-actions .btn-sell {
-  flex:1; background:#00723F; color:#fff;
-  border:none; border-radius:10px; padding:9px 0;
-  font-size:.8rem; font-weight:700; cursor:pointer;
-  transition:.15s; text-decoration:none; text-align:center;
-  display:flex; align-items:center; justify-content:center; gap:5px;
-}
-.pcard-actions .btn-sell:hover { background:#005530; }
-.pcard-actions .btn-sell.disabled { opacity:.45; pointer-events:none; }
-.pcard-actions .btn-icon {
-  width:36px; height:36px; border-radius:10px;
-  border:1px solid #dde8e2; background:#fff;
-  display:flex; align-items:center; justify-content:center;
-  color:#555; font-size:.85rem; cursor:pointer;
-  transition:.15s; text-decoration:none;
-  flex-shrink:0;
-}
-.pcard-actions .btn-icon:hover { border-color:#00723F; color:#00723F; background:#f0faf5; }
-.pcard-actions .btn-icon.danger:hover { border-color:#dc3545; color:#dc3545; background:#fff5f5; }
-
-/* expand panel */
-.pcard-expand {
-  display:none; padding:0 16px 14px;
-  border-top:1px solid #f0f5f2; margin-top:0;
-}
-.pcard-expand .elbl { font-size:.7rem; font-weight:700; color:#00723F; margin-bottom:4px; margin-top:10px; }
-.pcard-expand .etxt { font-size:.75rem; color:#555; line-height:1.6; }
-
-/* empty */
-.cat-empty { text-align:center; padding:64px 20px; background:#fff; border-radius:18px; border:1px solid #e8f0eb; }
-.cat-empty .eicon { font-size:3.5rem; margin-bottom:16px; }
-.cat-empty p { color:#888; margin-bottom:20px; }
-
-/* breadcrumb */
-.cat-breadcrumb { font-size:.78rem; color:#888; margin-bottom:18px; }
-.cat-breadcrumb a { color:#00723F; text-decoration:none; }
-.cat-breadcrumb a:hover { text-decoration:underline; }
-
-@media(max-width:768px){
-  .catalog-wrap { flex-direction:column; }
-  .cat-sidebar { width:100%; position:static; }
-  .prod-grid { grid-template-columns:repeat(auto-fill,minmax(160px,1fr)); }
+@media(max-width:600px){
+  .beauty-grid,.sport-grid,.prod-grid{grid-template-columns:repeat(2,1fr)}
+  .beauty-section,.sport-section{padding:20px}
 }
 </style>
 
-<!-- Breadcrumb -->
-<div class="cat-breadcrumb">
-  <a href="{{ url_for('dashboard') }}">Bosh sahifa</a>
-  <span class="mx-1">/</span>
-  <span>Mahsulotlar</span>
-  {% if cat %}<span class="mx-1">/</span><span>{{ cat }}</span>{% endif %}
-  {% if direc %}<span class="mx-1">/</span><span>{{ direc }}</span>{% endif %}
-</div>
-
-<div class="d-flex align-items-center justify-content-between mb-3">
-  <h1 class="page-title mb-0">Herbalife Katalogi</h1>
+<!-- PAGE HEADER -->
+<div class="cat-hdr">
+  <h1 class="cat-hdr-title">Herbalife Katalogi &nbsp;<span style="color:#888;font-weight:500;font-size:1rem">— {{ products|length }} ta mahsulot</span></h1>
   <a href="{{ url_for('product_add') }}" class="btn btn-hl px-4">
     <i class="bi bi-plus-lg me-2"></i>Yangi mahsulot
   </a>
 </div>
 
-<div class="catalog-wrap">
+<!-- SECTION JUMP PILLS -->
+<div class="cat-pills">
+  {% if cocktails %}<a class="cat-pill" href="#f1">🥤 Formula 1 &nbsp;<b>{{ cocktails|length }}</b></a>{% endif %}
+  {% if drinks    %}<a class="cat-pill" href="#drk">💧 Ichimliklar &nbsp;<b>{{ drinks|length }}</b></a>{% endif %}
+  {% if beauty_list %}<a class="cat-pill" href="#bty">✨ Красота &nbsp;<b>{{ beauty_list|length }}</b></a>{% endif %}
+  {% if sport_list %}<a class="cat-pill" href="#spt">⚡ Sport H24 &nbsp;<b>{{ sport_list|length }}</b></a>{% endif %}
+  {% if vit_list  %}<a class="cat-pill" href="#vit">💊 Vitaminlar &nbsp;<b>{{ vit_list|length }}</b></a>{% endif %}
+  {% if supp_list %}<a class="cat-pill" href="#sup">🌿 Qo'shimchalar &nbsp;<b>{{ supp_list|length }}</b></a>{% endif %}
+</div>
 
-  <!-- ── SIDEBAR ─────────────────────────────────────────────────── -->
-  <aside class="cat-sidebar">
-    <div class="cat-sidebar-head">
-      <i class="bi bi-funnel-fill"></i> Filtrlar
-      {% if direc or vid or cat %}
-      <a href="{{ url_for('products') }}" class="ms-auto text-success fw-600" style="font-size:.72rem;text-transform:none;letter-spacing:0">
-        Tozalash
-      </a>
-      {% endif %}
-    </div>
+{% if cocktails %}
+<!-- ══════════════════════════════════════════
+     FORMULA 1 — INTERACTIVE HERO
+     ══════════════════════════════════════════ -->
+<section class="f1-hero" id="f1">
+  <div class="f1-inner">
 
-    <!-- Direction -->
-    <div class="filter-section">
-      <div class="filter-section-title open" onclick="toggleSection(this)">
-        Yo'nalish <i class="bi bi-chevron-down"></i>
-      </div>
-      <div class="filter-section-body">
-        <a href="{{ url_for('products', vid=vid, cat=cat) }}"
-           class="filter-check {% if not direc %}active{% endif %}">
-          <span class="fcheck-box"></span> Barchasi
-        </a>
-        {% for name, emoji in directions %}
-        <a href="{{ url_for('products', dir=name, vid=vid, cat=cat) }}"
-           class="filter-check {% if direc == name %}active{% endif %}">
-          <span class="fcheck-box"></span>
-          <span>{{ emoji }} {{ name }}</span>
-        </a>
+    <!-- LEFT: flavor tabs -->
+    <div class="f1-left">
+      <div class="f1-brand">HERBALIFE · FORMULA 1 ®</div>
+      <div class="f1-heading">Kokteylar<br>Vitrinasi</div>
+      <div class="f1-tabs">
+        {% for p in cocktails %}
+        {% set short = p.name|replace('Formula 1 ','')|replace('Протеиновый Коктейль','Протеин') %}
+        <button class="f1-tab {% if loop.first %}active{% endif %}"
+                onclick="switchF1(this)"
+                data-pid="{{ p.id }}"
+                data-name="{{ p.name }}"
+                data-desc="{{ p.description or '' }}"
+                data-sostav="{{ (p.sostav or '')|truncate(130,True,'…') }}"
+                data-price="{{ '%.2f'|format(p.price) }}"
+                data-stock="{{ p.stock }}"
+                data-margin="{{ p.profit_margin() }}"
+                data-img="{{ p.image_url or '' }}"
+                data-sell="{{ url_for('order_add') }}?pid={{ p.id }}"
+                data-edit="{{ url_for('product_edit', pid=p.id) }}"
+                data-color="{{ F1C.get(p.name,'#1a7a45') }}">
+          {{ short }}
+          {% if p.name in NEW_NAMES %}<span class="tab-new">NEW</span>{% endif %}
+        </button>
         {% endfor %}
       </div>
     </div>
 
-    <!-- Tur (vid) -->
-    <div class="filter-section">
-      <div class="filter-section-title open" onclick="toggleSection(this)">
-        Mahsulot turi <i class="bi bi-chevron-down"></i>
+    <!-- RIGHT: active product display -->
+    {% set fp = cocktails[0] %}
+    <div class="f1-right">
+      <div class="f1-imgwrap" id="f1IW">
+        <img id="f1Img" src="{{ fp.image_url or 'https://placehold.co/280x320/1a7a45/fff?text=F1' }}"
+             alt="{{ fp.name }}"
+             onerror="this.src='https://placehold.co/280x320/1a7a45/fff?text=F1'">
       </div>
-      <div class="filter-section-body">
-        <a href="{{ url_for('products', dir=direc, cat=cat) }}"
-           class="filter-check {% if not vid %}active{% endif %}">
-          <span class="fcheck-box"></span> Barchasi
-        </a>
-        {% for v in vidi %}
-        <a href="{{ url_for('products', vid=v, dir=direc, cat=cat) }}"
-           class="filter-check {% if vid == v %}active{% endif %}">
-          <span class="fcheck-box"></span>
-          <span>
-            {% if v=='Шоколадные' %}🍫
-            {% elif v=='Фруктово-ягодные' %}🍓
-            {% elif v=='Нейтральные' %}⬜
-            {% elif v=='Напитки' %}🥤
-            {% elif v=='Вега' %}🌱
-            {% endif %}
-            {{ v }}
-          </span>
-        </a>
-        {% endfor %}
-      </div>
-    </div>
-
-    <!-- Kategoriya -->
-    {% if categories %}
-    <div class="filter-section">
-      <div class="filter-section-title open" onclick="toggleSection(this)">
-        Kategoriya <i class="bi bi-chevron-down"></i>
-      </div>
-      <div class="filter-section-body">
-        <a href="{{ url_for('products', dir=direc, vid=vid) }}"
-           class="filter-check {% if not cat %}active{% endif %}">
-          <span class="fcheck-box"></span> Barchasi
-        </a>
-        {% for c in categories %}
-        <a href="{{ url_for('products', cat=c, dir=direc, vid=vid) }}"
-           class="filter-check {% if cat == c %}active{% endif %}">
-          <span class="fcheck-box"></span> {{ c }}
-        </a>
-        {% endfor %}
-      </div>
-    </div>
-    {% endif %}
-  </aside>
-
-  <!-- ── MAIN CONTENT ────────────────────────────────────────────── -->
-  <div class="cat-main">
-
-    <!-- top bar: count + sort -->
-    <div class="cat-top-bar">
-      <div class="cat-count">
-        <strong>{{ products|length }}</strong> ta mahsulot
-        {% if direc or vid or cat %}
-        &nbsp;·&nbsp;
-        <a href="{{ url_for('products') }}" class="text-success text-decoration-none" style="font-size:.8rem">
-          <i class="bi bi-x-circle me-1"></i>Filtrni tozalash
-        </a>
-        {% endif %}
-      </div>
-      <div class="cat-sort">
-        <span>Saralash:</span>
-        <select onchange="sortProducts(this.value)">
-          <option value="default">Standart</option>
-          <option value="name_asc">Nomi (A-Z)</option>
-          <option value="name_desc">Nomi (Z-A)</option>
-          <option value="price_asc">Narx (past-yuqori)</option>
-          <option value="price_desc">Narx (yuqori-past)</option>
-          <option value="stock_desc">Ombor (ko'p-kam)</option>
-        </select>
-      </div>
-    </div>
-
-    {% if products %}
-    <div class="prod-grid" id="prodGrid">
-      {% set emoji_map = {
-        'Снижение веса':'⚖️','Правильное питание':'🥗','Здоровый образ жизни':'💚',
-        'Красота':'💄','Анти-стресс':'🧘','Долголетие':'⏳','Детокс':'🌿',
-        'Иммунитет':'🛡️','Пищеварение':'🌱','Энергия':'⚡'
-      } %}
-
-      {% for p in products %}
-      <div class="pcard"
-           data-name="{{ p.name }}"
-           data-price="{{ p.price }}"
-           data-stock="{{ p.stock }}">
-
-        <!-- Image -->
-        <div class="pcard-img">
-          {% if p.image_url %}
-            <img src="{{ p.image_url }}" alt="{{ p.name }}"
-                 onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
-            <span class="pcard-emoji" style="display:none">
-              {% if p.category=='Коктейль' %}🥤{% elif p.category=='Напиток' %}💧{% elif p.category=='Витамины' %}💊{% elif p.category=='Красота' %}✨{% else %}🌿{% endif %}
-            </span>
-          {% else %}
-            <span class="pcard-emoji">
-              {% if p.category=='Коктейль' %}🥤{% elif p.category=='Напиток' %}💧{% elif p.category=='Витамины' %}💊{% elif p.category=='Красота' %}✨{% else %}🌿{% endif %}
-            </span>
-          {% endif %}
-
-          <!-- badges -->
-          <div class="pcard-badge-row">
-            <span class="pcard-stock {% if p.stock > 20 %}ok{% elif p.stock > 0 %}low{% else %}out{% endif %}">
-              {% if p.stock > 20 %}{{ p.stock }} dona
-              {% elif p.stock > 0 %}{{ p.stock }} qoldi
-              {% else %}Tugagan{% endif %}
-            </span>
-            {% if p.vid %}
-            <span class="pcard-vid">{{ p.vid }}</span>
-            {% endif %}
-          </div>
+      <div class="f1-info">
+        <div class="f1-info-label">Herbalife Коктейль</div>
+        <div class="f1-info-name" id="f1Name">{{ fp.name }}</div>
+        <div class="f1-info-desc" id="f1Desc">{{ fp.description }}</div>
+        <div class="f1-info-sostav" id="f1Sostav">{{ (fp.sostav or '')|truncate(130,True,'…') }}</div>
+        <div class="f1-price-row">
+          <span class="f1-price" id="f1Price">${{ '%.2f'|format(fp.price) }}</span>
+          <span class="f1-badge green" id="f1Stock">{{ fp.stock }} dona</span>
+          <span class="f1-badge gray" id="f1Margin">{{ fp.profit_margin() }}% foyda</span>
         </div>
-
-        <!-- Body -->
-        <div class="pcard-body">
-          <div class="pcard-cat">{{ p.category }}</div>
-          <div class="pcard-name">{{ p.name }}</div>
-          {% if p.description %}
-          <div class="pcard-desc">{{ p.description }}</div>
-          {% endif %}
-
-          {% if p.directions_list() %}
-          <div class="pcard-dirs">
-            {% for d in p.directions_list()[:3] %}
-            <span class="pcard-dir-chip">{{ emoji_map.get(d,'') }} {{ d }}</span>
-            {% endfor %}
-          </div>
-          {% endif %}
-
-          <div class="pcard-price-row">
-            <div>
-              <div class="pcard-price">${{ "%.2f"|format(p.price) }}</div>
-              {% if p.cost_price %}
-              <div class="pcard-cost">Tan: ${{ "%.2f"|format(p.cost_price) }}</div>
-              {% endif %}
-            </div>
-            <span class="pcard-margin {% if p.profit_margin() >= 30 %}good{% else %}ok{% endif %}">
-              {{ p.profit_margin() }}%
-            </span>
-          </div>
-        </div>
-
-        <!-- Expand panel -->
-        {% if p.sostav or p.recipe %}
-        <div class="pcard-expand" id="pe-{{ p.id }}">
-          {% if p.sostav %}
-          <div class="elbl">🧪 Tarkib</div>
-          <div class="etxt">{{ p.sostav }}</div>
-          {% endif %}
-          {% if p.recipe %}
-          <div class="elbl">📋 Ishlatish</div>
-          <div class="etxt">{{ p.recipe }}</div>
-          {% endif %}
-        </div>
-        {% endif %}
-
-        <!-- Actions -->
-        <div class="pcard-actions">
-          <a href="{{ url_for('order_add') }}?pid={{ p.id }}"
-             class="btn-sell {% if p.stock == 0 %}disabled{% endif %}">
+        <div class="f1-actions">
+          <a class="f1-sell" id="f1Sell" href="{{ url_for('order_add') }}?pid={{ fp.id }}">
             <i class="bi bi-cart-plus"></i> Sotish
           </a>
-          {% if p.sostav or p.recipe %}
-          <button class="btn-icon" onclick="toggleProd({{ p.id }},this)" title="Tarkib">
-            <i class="bi bi-info-circle"></i>
-          </button>
-          {% endif %}
-          <a href="{{ url_for('product_edit', pid=p.id) }}" class="btn-icon" title="Tahrirlash">
+          <a class="f1-edit" id="f1Edit" href="{{ url_for('product_edit', pid=fp.id) }}" title="Tahrirlash">
             <i class="bi bi-pencil"></i>
           </a>
-          <form method="post" action="{{ url_for('product_delete', pid=p.id) }}"
-                onsubmit="return confirm('{{ p.name }} o\'chirilsinmi?')">
-            <button type="submit" class="btn-icon danger" title="O'chirish">
-              <i class="bi bi-trash"></i>
-            </button>
-          </form>
         </div>
       </div>
-      {% endfor %}
     </div>
 
-    {% else %}
-    <div class="cat-empty">
-      <div class="eicon">📦</div>
-      <p>Mahsulot topilmadi</p>
-      <a href="{{ url_for('products') }}" class="btn btn-ghost me-2">Filtrni tozalash</a>
-      <a href="{{ url_for('product_add') }}" class="btn btn-hl">Yangi mahsulot</a>
+  </div>
+</section>
+{% endif %}
+
+{% if drinks %}
+<!-- ══════════════════════════════════════════
+     ICHIMLIKLAR — HORIZONTAL SHOWCASE
+     ══════════════════════════════════════════ -->
+<div class="drinks-section" id="drk">
+  <div class="sec-hdr">
+    <div>
+      <div class="sec-title">💧 Ichimliklar & Choylar</div>
+      <div class="sec-sub">NRG choylar · CR7 Drive · Aloe Vera · Mango</div>
     </div>
-    {% endif %}
+    <span class="sec-badge">{{ drinks|length }} ta</span>
+  </div>
+  <div class="drinks-row">
+    {% for p in drinks %}
+    <div class="dcard" style="--dc:{{ DRC.get(p.name,'#1a7a45') }}">
+      <div class="dcard-top">
+        <img src="{{ p.image_url or '' }}" alt="{{ p.name }}"
+             onerror="this.style.display='none'">
+      </div>
+      <div class="dcard-body">
+        <div class="dcard-name">{{ p.name }}</div>
+        <div class="dcard-price">${{ '%.2f'|format(p.price) }}</div>
+        <a class="dcard-sell" href="{{ url_for('order_add') }}?pid={{ p.id }}">
+          <i class="bi bi-cart-plus"></i> Sotish
+        </a>
+      </div>
+    </div>
+    {% endfor %}
   </div>
 </div>
+{% endif %}
+
+{% if beauty_list %}
+<!-- ══════════════════════════════════════════
+     КРАСОТА — BEAUTY SHOWCASE
+     ══════════════════════════════════════════ -->
+<section class="beauty-section" id="bty">
+  <div class="beauty-hdr">
+    <div class="beauty-title">✨ Красота & Уход</div>
+    <div class="beauty-sub">
+      Go'zallik, teri parvarishi va kollagen — {{ beauty_list|length }} ta mahsulot
+    </div>
+  </div>
+  <div class="beauty-grid">
+    {% for p in beauty_list %}
+    <div class="bcard">
+      <div class="bcard-img">
+        <img src="{{ p.image_url or '' }}" alt="{{ p.name }}"
+             onerror="this.src='https://placehold.co/200x200/e91e63/fff?text=Beauty'">
+      </div>
+      <div class="bcard-body">
+        <div class="bcard-name">{{ p.name }}</div>
+        <div class="bcard-desc">{{ p.description }}</div>
+        <div class="bcard-price">${{ '%.2f'|format(p.price) }}</div>
+        <a class="bcard-sell" href="{{ url_for('order_add') }}?pid={{ p.id }}">
+          <i class="bi bi-cart-plus"></i> Sotish
+        </a>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+
+{% if sport_list %}
+<!-- ══════════════════════════════════════════
+     SPORT H24
+     ══════════════════════════════════════════ -->
+<section class="sport-section" id="spt">
+  <div class="sport-title">⚡ Herbalife 24 — Sport Liniyasi</div>
+  <div class="sport-sub">Professional sportchilar uchun: treningdan oldin · vaqtida · keyin</div>
+  <div class="sport-grid">
+    {% for p in sport_list %}
+    <div class="spcard">
+      <div class="spcard-img">
+        <img src="{{ p.image_url or '' }}" alt="{{ p.name }}"
+             onerror="this.src='https://placehold.co/175x135/1565c0/fff?text=H24'">
+      </div>
+      <div class="spcard-body">
+        <div class="spcard-name">{{ p.name }}</div>
+        <div class="spcard-desc">{{ p.description }}</div>
+        <div class="spcard-price">${{ '%.2f'|format(p.price) }}</div>
+        <a class="spcard-sell" href="{{ url_for('order_add') }}?pid={{ p.id }}">
+          <i class="bi bi-cart-plus"></i> Sotish
+        </a>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+
+{% if vit_list %}
+<!-- ══════════════════════════════════════════
+     VITAMINLAR
+     ══════════════════════════════════════════ -->
+<div class="grid-sec" id="vit">
+  <div class="grid-sec-hdr">
+    <div class="grid-sec-icon icon-vit">💊</div>
+    <div>
+      <div class="grid-sec-title">Vitaminlar & Minerallar</div>
+      <div class="grid-sec-cnt">{{ vit_list|length }} ta mahsulot</div>
+    </div>
+  </div>
+  <div class="prod-grid">
+    {% for p in vit_list %}
+    <div class="pcard">
+      <div class="pcard-img">
+        {% if p.image_url %}
+          <img src="{{ p.image_url }}" alt="{{ p.name }}"
+               onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
+          <span class="pcard-emoji" style="display:none">💊</span>
+        {% else %}
+          <span class="pcard-emoji">💊</span>
+        {% endif %}
+        <div class="pcard-badges">
+          <span class="pstock {% if p.stock>20 %}ok{% elif p.stock>0 %}low{% else %}out{% endif %}">
+            {% if p.stock>20 %}{{ p.stock }} dona{% elif p.stock>0 %}{{ p.stock }} qoldi{% else %}Tugagan{% endif %}
+          </span>
+        </div>
+      </div>
+      <div class="pcard-body">
+        <div class="pcard-cat">{{ p.category }}</div>
+        <div class="pcard-name">{{ p.name }}</div>
+        {% if p.description %}<div class="pcard-desc">{{ p.description }}</div>{% endif %}
+        <div class="pcard-pr">
+          <span class="pcard-price">${{ '%.2f'|format(p.price) }}</span>
+          <span class="pmarg {% if p.profit_margin()>=30 %}g{% else %}o{% endif %}">{{ p.profit_margin() }}%</span>
+        </div>
+      </div>
+      <div class="pcard-acts">
+        <a href="{{ url_for('order_add') }}?pid={{ p.id }}"
+           class="btn-sell {% if p.stock==0 %}dis{% endif %}">
+          <i class="bi bi-cart-plus"></i> Sotish
+        </a>
+        <a href="{{ url_for('product_edit', pid=p.id) }}" class="btn-ico"><i class="bi bi-pencil"></i></a>
+        <form method="post" action="{{ url_for('product_delete', pid=p.id) }}"
+              onsubmit="return confirm('{{ p.name }} o\'chirilsinmi?')">
+          <button type="submit" class="btn-ico d"><i class="bi bi-trash"></i></button>
+        </form>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endif %}
+
+{% if supp_list %}
+<!-- ══════════════════════════════════════════
+     QO'SHIMCHALAR
+     ══════════════════════════════════════════ -->
+<div class="grid-sec" id="sup">
+  <div class="grid-sec-hdr">
+    <div class="grid-sec-icon icon-sup">🌿</div>
+    <div>
+      <div class="grid-sec-title">Qo'shimchalar & Detoks</div>
+      <div class="grid-sec-cnt">{{ supp_list|length }} ta mahsulot</div>
+    </div>
+  </div>
+  <div class="prod-grid">
+    {% for p in supp_list %}
+    <div class="pcard">
+      <div class="pcard-img">
+        {% if p.image_url %}
+          <img src="{{ p.image_url }}" alt="{{ p.name }}"
+               onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
+          <span class="pcard-emoji" style="display:none">🌿</span>
+        {% else %}
+          <span class="pcard-emoji">🌿</span>
+        {% endif %}
+        <div class="pcard-badges">
+          <span class="pstock {% if p.stock>20 %}ok{% elif p.stock>0 %}low{% else %}out{% endif %}">
+            {% if p.stock>20 %}{{ p.stock }} dona{% elif p.stock>0 %}{{ p.stock }} qoldi{% else %}Tugagan{% endif %}
+          </span>
+        </div>
+      </div>
+      <div class="pcard-body">
+        <div class="pcard-cat">{{ p.category }}</div>
+        <div class="pcard-name">{{ p.name }}</div>
+        {% if p.description %}<div class="pcard-desc">{{ p.description }}</div>{% endif %}
+        <div class="pcard-pr">
+          <span class="pcard-price">${{ '%.2f'|format(p.price) }}</span>
+          <span class="pmarg {% if p.profit_margin()>=30 %}g{% else %}o{% endif %}">{{ p.profit_margin() }}%</span>
+        </div>
+      </div>
+      <div class="pcard-acts">
+        <a href="{{ url_for('order_add') }}?pid={{ p.id }}"
+           class="btn-sell {% if p.stock==0 %}dis{% endif %}">
+          <i class="bi bi-cart-plus"></i> Sotish
+        </a>
+        <a href="{{ url_for('product_edit', pid=p.id) }}" class="btn-ico"><i class="bi bi-pencil"></i></a>
+        <form method="post" action="{{ url_for('product_delete', pid=p.id) }}"
+              onsubmit="return confirm('{{ p.name }} o\'chirilsinmi?')">
+          <button type="submit" class="btn-ico d"><i class="bi bi-trash"></i></button>
+        </form>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endif %}
+
 {% endblock %}
 
 {% block scripts %}
 <script>
-function toggleSection(el) {
-  el.classList.toggle('open');
-  const body = el.nextElementSibling;
-  body.style.display = body.style.display === 'none' ? '' : 'none';
-}
+function switchF1(btn) {
+  document.querySelectorAll('.f1-tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
 
-function toggleProd(id, btn) {
-  const el = document.getElementById('pe-' + id);
-  const open = el.style.display === 'block';
-  el.style.display = open ? 'none' : 'block';
-  btn.innerHTML = open ? '<i class="bi bi-info-circle"></i>' : '<i class="bi bi-x-circle"></i>';
-  btn.style.borderColor = open ? '' : '#00723F';
-  btn.style.color = open ? '' : '#00723F';
-}
+  const iw = document.getElementById('f1IW');
+  iw.classList.add('fade');
 
-function sortProducts(val) {
-  const grid = document.getElementById('prodGrid');
-  const cards = [...grid.querySelectorAll('.pcard')];
-  cards.sort((a,b) => {
-    if (val === 'name_asc')   return a.dataset.name.localeCompare(b.dataset.name);
-    if (val === 'name_desc')  return b.dataset.name.localeCompare(a.dataset.name);
-    if (val === 'price_asc')  return parseFloat(a.dataset.price) - parseFloat(b.dataset.price);
-    if (val === 'price_desc') return parseFloat(b.dataset.price) - parseFloat(a.dataset.price);
-    if (val === 'stock_desc') return parseFloat(b.dataset.stock) - parseFloat(a.dataset.stock);
-    return 0;
-  });
-  cards.forEach(c => grid.appendChild(c));
+  setTimeout(() => {
+    const img = document.getElementById('f1Img');
+    const src = btn.dataset.img;
+    img.src = src && src.trim() ? src : 'https://placehold.co/280x320/1a7a45/fff?text=F1';
+    img.onerror = () => { img.src = 'https://placehold.co/280x320/1a7a45/fff?text=F1'; };
+
+    document.getElementById('f1Name').textContent    = btn.dataset.name;
+    document.getElementById('f1Desc').textContent    = btn.dataset.desc;
+    document.getElementById('f1Sostav').textContent  = btn.dataset.sostav;
+    document.getElementById('f1Price').textContent   = '$' + btn.dataset.price;
+    document.getElementById('f1Stock').textContent   = btn.dataset.stock + ' dona';
+    document.getElementById('f1Margin').textContent  = btn.dataset.margin + '% foyda';
+    document.getElementById('f1Sell').href           = btn.dataset.sell;
+    document.getElementById('f1Edit').href           = btn.dataset.edit;
+
+    const c = btn.dataset.color || '#2E7D32';
+    document.querySelector('.f1-hero').style.setProperty('--fa', c);
+
+    iw.classList.remove('fade');
+  }, 210);
 }
 </script>
 {% endblock %}
