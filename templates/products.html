@@ -3,216 +3,494 @@
 {% block topbar_title %}<i class="bi bi-box-seam-fill me-2 text-success"></i>Mahsulotlar Katalogi{% endblock %}
 
 {% block content %}
+<style>
+/* ── Catalog layout ─────────────────────────────────────────────── */
+.catalog-wrap { display:flex; gap:28px; align-items:flex-start; }
 
-<!-- Page header -->
-<div class="d-flex align-items-center justify-content-between mb-4">
-  <div>
-    <h1 class="page-title mb-1">Herbalife Katalogi</h1>
-    <p class="text-muted mb-0" style="font-size:.82rem">
-      {{ products|length }} ta mahsulot
-      {% if direc or vid or cat %}
-      &nbsp;·&nbsp;
-      <a href="{{ url_for('products') }}" class="text-decoration-none text-success fw-600">
-        <i class="bi bi-x-circle me-1"></i>Filtrni tozalash
-      </a>
-      {% endif %}
-    </p>
-  </div>
+/* SIDEBAR */
+.cat-sidebar {
+  width:260px; flex-shrink:0;
+  background:#fff; border-radius:16px;
+  border:1px solid #e8f0eb;
+  padding:0; overflow:hidden;
+  position:sticky; top:80px;
+}
+.cat-sidebar-head {
+  padding:16px 20px;
+  background:#f5faf7;
+  border-bottom:1px solid #e8f0eb;
+  font-size:.78rem; font-weight:700;
+  letter-spacing:.8px; color:#2e7d52;
+  text-transform:uppercase;
+  display:flex; align-items:center; gap:8px;
+}
+.filter-section { border-bottom:1px solid #f0f4f2; }
+.filter-section:last-child { border-bottom:none; }
+.filter-section-title {
+  padding:14px 20px;
+  font-size:.82rem; font-weight:700; color:#1a3a2a;
+  cursor:pointer;
+  display:flex; justify-content:space-between; align-items:center;
+  user-select:none;
+  transition:.15s;
+}
+.filter-section-title:hover { background:#f8fdf9; }
+.filter-section-title i { color:#aaa; font-size:.7rem; transition:.2s; }
+.filter-section-title.open i { transform:rotate(180deg); color:#00723F; }
+.filter-section-body { padding:4px 12px 14px; }
+.filter-check {
+  display:flex; align-items:center; gap:10px;
+  padding:7px 8px; border-radius:10px;
+  cursor:pointer; transition:.12s;
+  font-size:.83rem; color:#333;
+  text-decoration:none;
+}
+.filter-check:hover { background:#f0faf5; color:#00723F; }
+.filter-check.active { color:#00723F; font-weight:700; background:#ebf7f1; }
+.filter-check .fcheck-box {
+  width:16px; height:16px; border-radius:4px;
+  border:2px solid #ccc; flex-shrink:0;
+  display:flex; align-items:center; justify-content:center;
+  transition:.12s;
+}
+.filter-check.active .fcheck-box {
+  background:#00723F; border-color:#00723F;
+}
+.filter-check.active .fcheck-box::after {
+  content:'✓'; color:#fff; font-size:10px; font-weight:900;
+}
+.clear-filter {
+  display:block; margin:8px 12px 0;
+  font-size:.75rem; color:#00723F; text-decoration:none;
+  opacity:.7;
+}
+.clear-filter:hover { opacity:1; }
+
+/* MAIN */
+.cat-main { flex:1; min-width:0; }
+.cat-top-bar {
+  display:flex; align-items:center; justify-content:space-between;
+  margin-bottom:20px; flex-wrap:wrap; gap:10px;
+}
+.cat-count { font-size:.88rem; color:#666; }
+.cat-count strong { color:#1a3a2a; }
+.cat-sort {
+  display:flex; align-items:center; gap:8px;
+  font-size:.82rem; color:#555;
+}
+.cat-sort select {
+  border:1px solid #dde8e2; border-radius:10px;
+  padding:7px 14px; font-size:.82rem; color:#333;
+  background:#fff; cursor:pointer; outline:none;
+}
+
+/* PRODUCT CARDS */
+.prod-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(210px,1fr)); gap:18px; }
+
+.pcard {
+  background:#fff;
+  border:1px solid #e8f0eb;
+  border-radius:18px;
+  overflow:hidden;
+  transition:.18s;
+  display:flex; flex-direction:column;
+  position:relative;
+}
+.pcard:hover {
+  border-color:#b2d8c0;
+  box-shadow:0 8px 28px rgba(0,114,63,.10);
+  transform:translateY(-3px);
+}
+
+/* image area */
+.pcard-img {
+  height:200px;
+  display:flex; align-items:center; justify-content:center;
+  background:#f8fcf9;
+  border-bottom:1px solid #f0f5f2;
+  position:relative; overflow:hidden;
+  padding:16px;
+}
+.pcard-img img {
+  max-width:100%; max-height:168px;
+  object-fit:contain;
+  transition:.2s;
+}
+.pcard:hover .pcard-img img { transform:scale(1.04); }
+.pcard-img .pcard-emoji {
+  font-size:72px; line-height:1;
+}
+
+/* badges on image */
+.pcard-badge-row {
+  position:absolute; top:10px; left:10px; right:10px;
+  display:flex; justify-content:space-between; align-items:flex-start;
+}
+.pcard-stock {
+  font-size:.68rem; font-weight:700; border-radius:8px;
+  padding:3px 8px; line-height:1.3;
+}
+.pcard-stock.ok   { background:#e8f7ee; color:#1e7a3e; }
+.pcard-stock.low  { background:#fff8e1; color:#e65100; }
+.pcard-stock.out  { background:#fce8e8; color:#c62828; }
+
+.pcard-vid {
+  font-size:.62rem; font-weight:700; border-radius:8px;
+  padding:3px 8px; background:rgba(255,255,255,.9);
+  color:#00723F; border:1px solid #b2d8c0;
+}
+
+/* body */
+.pcard-body { padding:16px; flex:1; display:flex; flex-direction:column; gap:8px; }
+.pcard-cat  { font-size:.68rem; font-weight:700; color:#00723F; letter-spacing:.5px; text-transform:uppercase; }
+.pcard-name { font-size:.92rem; font-weight:700; color:#1a2a1e; line-height:1.35; }
+.pcard-desc { font-size:.75rem; color:#778f80; line-height:1.5; flex:1; }
+
+.pcard-dirs { display:flex; flex-wrap:wrap; gap:4px; }
+.pcard-dir-chip {
+  font-size:.62rem; background:#f0faf5; color:#2e7d52;
+  border-radius:6px; padding:2px 7px; font-weight:600;
+}
+
+/* price row */
+.pcard-price-row {
+  display:flex; align-items:flex-end; justify-content:space-between;
+  padding-top:8px; border-top:1px solid #f0f5f2; margin-top:auto;
+}
+.pcard-price { font-size:1.15rem; font-weight:800; color:#1a2a1e; }
+.pcard-cost  { font-size:.7rem; color:#aaa; }
+.pcard-margin {
+  font-size:.7rem; font-weight:700; border-radius:8px;
+  padding:3px 8px;
+}
+.pcard-margin.good { background:#e8f7ee; color:#1e7a3e; }
+.pcard-margin.ok   { background:#fff8e1; color:#b45309; }
+
+/* actions */
+.pcard-actions {
+  display:flex; gap:6px; padding:0 16px 14px;
+}
+.pcard-actions .btn-sell {
+  flex:1; background:#00723F; color:#fff;
+  border:none; border-radius:10px; padding:9px 0;
+  font-size:.8rem; font-weight:700; cursor:pointer;
+  transition:.15s; text-decoration:none; text-align:center;
+  display:flex; align-items:center; justify-content:center; gap:5px;
+}
+.pcard-actions .btn-sell:hover { background:#005530; }
+.pcard-actions .btn-sell.disabled { opacity:.45; pointer-events:none; }
+.pcard-actions .btn-icon {
+  width:36px; height:36px; border-radius:10px;
+  border:1px solid #dde8e2; background:#fff;
+  display:flex; align-items:center; justify-content:center;
+  color:#555; font-size:.85rem; cursor:pointer;
+  transition:.15s; text-decoration:none;
+  flex-shrink:0;
+}
+.pcard-actions .btn-icon:hover { border-color:#00723F; color:#00723F; background:#f0faf5; }
+.pcard-actions .btn-icon.danger:hover { border-color:#dc3545; color:#dc3545; background:#fff5f5; }
+
+/* expand panel */
+.pcard-expand {
+  display:none; padding:0 16px 14px;
+  border-top:1px solid #f0f5f2; margin-top:0;
+}
+.pcard-expand .elbl { font-size:.7rem; font-weight:700; color:#00723F; margin-bottom:4px; margin-top:10px; }
+.pcard-expand .etxt { font-size:.75rem; color:#555; line-height:1.6; }
+
+/* empty */
+.cat-empty { text-align:center; padding:64px 20px; background:#fff; border-radius:18px; border:1px solid #e8f0eb; }
+.cat-empty .eicon { font-size:3.5rem; margin-bottom:16px; }
+.cat-empty p { color:#888; margin-bottom:20px; }
+
+/* breadcrumb */
+.cat-breadcrumb { font-size:.78rem; color:#888; margin-bottom:18px; }
+.cat-breadcrumb a { color:#00723F; text-decoration:none; }
+.cat-breadcrumb a:hover { text-decoration:underline; }
+
+@media(max-width:768px){
+  .catalog-wrap { flex-direction:column; }
+  .cat-sidebar { width:100%; position:static; }
+  .prod-grid { grid-template-columns:repeat(auto-fill,minmax(160px,1fr)); }
+}
+</style>
+
+<!-- Breadcrumb -->
+<div class="cat-breadcrumb">
+  <a href="{{ url_for('dashboard') }}">Bosh sahifa</a>
+  <span class="mx-1">/</span>
+  <span>Mahsulotlar</span>
+  {% if cat %}<span class="mx-1">/</span><span>{{ cat }}</span>{% endif %}
+  {% if direc %}<span class="mx-1">/</span><span>{{ direc }}</span>{% endif %}
+</div>
+
+<div class="d-flex align-items-center justify-content-between mb-3">
+  <h1 class="page-title mb-0">Herbalife Katalogi</h1>
   <a href="{{ url_for('product_add') }}" class="btn btn-hl px-4">
     <i class="bi bi-plus-lg me-2"></i>Yangi mahsulot
   </a>
 </div>
 
-<!-- ── Filters ──────────────────────────────────────────────────── -->
-<div class="filter-block">
-  <div class="filter-block-title"><i class="bi bi-compass me-1"></i>Yo'nalish bo'yicha filtrlash</div>
-  <div class="filter-pills">
-    <a href="{{ url_for('products', vid=vid, cat=cat) }}"
-       class="filter-pill {% if not direc %}active{% endif %}">
-      🌐 Barchasi
-    </a>
-    {% for name, emoji in directions %}
-    <a href="{{ url_for('products', dir=name, vid=vid, cat=cat) }}"
-       class="filter-pill {% if direc == name %}active{% endif %}">
-      {{ emoji }} {{ name }}
-    </a>
-    {% endfor %}
-  </div>
-</div>
+<div class="catalog-wrap">
 
-<div class="filter-block">
-  <div class="filter-block-title"><i class="bi bi-funnel me-1"></i>Tur bo'yicha</div>
-  <div class="vid-pill-group">
-    <a href="{{ url_for('products', cat=cat, dir=direc) }}"
-       class="vid-pill {% if not vid %}active{% endif %}">Hammasi</a>
-    {% for v in vidi %}
-    <a href="{{ url_for('products', vid=v, cat=cat, dir=direc) }}"
-       class="vid-pill {% if vid == v %}active{% endif %}">
-      {% if v == 'Шоколадные' %}🍫
-      {% elif v == 'Фруктово-ягодные' %}🍓
-      {% elif v == 'Нейтральные' %}⬜
-      {% elif v == 'Напитки' %}🥤
-      {% elif v == 'Вега' %}🌱
-      {% endif %} {{ v }}
-    </a>
-    {% endfor %}
-  </div>
-</div>
+  <!-- ── SIDEBAR ─────────────────────────────────────────────────── -->
+  <aside class="cat-sidebar">
+    <div class="cat-sidebar-head">
+      <i class="bi bi-funnel-fill"></i> Filtrlar
+      {% if direc or vid or cat %}
+      <a href="{{ url_for('products') }}" class="ms-auto text-success fw-600" style="font-size:.72rem;text-transform:none;letter-spacing:0">
+        Tozalash
+      </a>
+      {% endif %}
+    </div>
 
-<!-- ── Product grid ──────────────────────────────────────────────── -->
-{% if products %}
-<div class="row g-3">
-  {% for p in products %}
-  <div class="col-sm-6 col-lg-4 col-xl-3">
-    <div class="prod-card">
-
-      <!-- IMAGE or GRADIENT -->
-      <div class="prod-img-wrap" style="position:relative">
-        {% if p.image_url %}
-          <img src="{{ p.image_url }}" alt="{{ p.name }}"
-               onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
-          <div class="prod-img-gradient grad-{{ p.category or 'default' }}" style="display:none">
-            {% if p.category == 'Коктейль' %}🥤
-            {% elif p.category == 'Напиток' %}💧
-            {% elif p.category == 'Витамины' %}💊
-            {% elif p.category == 'Красота' %}✨
-            {% elif p.category == 'Добавки' %}🌿
-            {% else %}📦{% endif %}
-          </div>
-        {% else %}
-          <div class="prod-img-gradient grad-{{ p.category or 'default' }}">
-            {% if p.category == 'Коктейль' %}🥤
-            {% elif p.category == 'Напиток' %}💧
-            {% elif p.category == 'Витамины' %}💊
-            {% elif p.category == 'Красота' %}✨
-            {% elif p.category == 'Добавки' %}🌿
-            {% else %}📦{% endif %}
-          </div>
-        {% endif %}
-
-        <!-- Vid ribbon -->
-        {% if p.vid %}
-        <div class="prod-vid-ribbon ribbon-{{ p.vid|replace(' ','-') }}">
-          {% if p.vid == 'Шоколадные' %}🍫
-          {% elif p.vid == 'Фруктово-ягодные' %}🍓
-          {% elif p.vid == 'Нейтральные' %}⬜
-          {% elif p.vid == 'Напитки' %}🥤
-          {% elif p.vid == 'Вега' %}🌱
-          {% endif %}
-          {{ p.vid }}
-        </div>
-        {% endif %}
-
-        <!-- Stock badge -->
-        <div class="prod-stock-badge {% if p.stock > 20 %}stock-ok{% elif p.stock > 0 %}stock-low{% else %}stock-out{% endif %}">
-          {% if p.stock > 20 %}✅ {{ p.stock }}
-          {% elif p.stock > 0 %}⚠️ {{ p.stock }} qoldi
-          {% else %}❌ Tugagan
-          {% endif %}
-        </div>
+    <!-- Direction -->
+    <div class="filter-section">
+      <div class="filter-section-title open" onclick="toggleSection(this)">
+        Yo'nalish <i class="bi bi-chevron-down"></i>
       </div>
+      <div class="filter-section-body">
+        <a href="{{ url_for('products', vid=vid, cat=cat) }}"
+           class="filter-check {% if not direc %}active{% endif %}">
+          <span class="fcheck-box"></span> Barchasi
+        </a>
+        {% for name, emoji in directions %}
+        <a href="{{ url_for('products', dir=name, vid=vid, cat=cat) }}"
+           class="filter-check {% if direc == name %}active{% endif %}">
+          <span class="fcheck-box"></span>
+          <span>{{ emoji }} {{ name }}</span>
+        </a>
+        {% endfor %}
+      </div>
+    </div>
 
-      <!-- BODY -->
-      <div class="prod-body">
-        <div class="prod-cat-tag">{{ p.category }}</div>
-        <div class="prod-name">{{ p.name }}</div>
-        {% if p.description %}
-        <div class="prod-desc">{{ p.description }}</div>
+    <!-- Tur (vid) -->
+    <div class="filter-section">
+      <div class="filter-section-title open" onclick="toggleSection(this)">
+        Mahsulot turi <i class="bi bi-chevron-down"></i>
+      </div>
+      <div class="filter-section-body">
+        <a href="{{ url_for('products', dir=direc, cat=cat) }}"
+           class="filter-check {% if not vid %}active{% endif %}">
+          <span class="fcheck-box"></span> Barchasi
+        </a>
+        {% for v in vidi %}
+        <a href="{{ url_for('products', vid=v, dir=direc, cat=cat) }}"
+           class="filter-check {% if vid == v %}active{% endif %}">
+          <span class="fcheck-box"></span>
+          <span>
+            {% if v=='Шоколадные' %}🍫
+            {% elif v=='Фруктово-ягодные' %}🍓
+            {% elif v=='Нейтральные' %}⬜
+            {% elif v=='Напитки' %}🥤
+            {% elif v=='Вега' %}🌱
+            {% endif %}
+            {{ v }}
+          </span>
+        </a>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- Kategoriya -->
+    {% if categories %}
+    <div class="filter-section">
+      <div class="filter-section-title open" onclick="toggleSection(this)">
+        Kategoriya <i class="bi bi-chevron-down"></i>
+      </div>
+      <div class="filter-section-body">
+        <a href="{{ url_for('products', dir=direc, vid=vid) }}"
+           class="filter-check {% if not cat %}active{% endif %}">
+          <span class="fcheck-box"></span> Barchasi
+        </a>
+        {% for c in categories %}
+        <a href="{{ url_for('products', cat=c, dir=direc, vid=vid) }}"
+           class="filter-check {% if cat == c %}active{% endif %}">
+          <span class="fcheck-box"></span> {{ c }}
+        </a>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+  </aside>
+
+  <!-- ── MAIN CONTENT ────────────────────────────────────────────── -->
+  <div class="cat-main">
+
+    <!-- top bar: count + sort -->
+    <div class="cat-top-bar">
+      <div class="cat-count">
+        <strong>{{ products|length }}</strong> ta mahsulot
+        {% if direc or vid or cat %}
+        &nbsp;·&nbsp;
+        <a href="{{ url_for('products') }}" class="text-success text-decoration-none" style="font-size:.8rem">
+          <i class="bi bi-x-circle me-1"></i>Filtrni tozalash
+        </a>
         {% endif %}
+      </div>
+      <div class="cat-sort">
+        <span>Saralash:</span>
+        <select onchange="sortProducts(this.value)">
+          <option value="default">Standart</option>
+          <option value="name_asc">Nomi (A-Z)</option>
+          <option value="name_desc">Nomi (Z-A)</option>
+          <option value="price_asc">Narx (past-yuqori)</option>
+          <option value="price_desc">Narx (yuqori-past)</option>
+          <option value="stock_desc">Ombor (ko'p-kam)</option>
+        </select>
+      </div>
+    </div>
 
-        <!-- Direction chips -->
-        {% set emoji_map = {
-          'Снижение веса':'⚖️','Правильное питание':'🥗','Здоровый образ жизни':'💚',
-          'Красота':'💄','Анти-стресс':'🧘','Долголетие':'⏳','Детокс':'🌿',
-          'Иммунитет':'🛡️','Пищеварение':'🌱','Энергия':'⚡'
-        } %}
-        {% if p.directions_list() %}
-        <div class="prod-dirs">
-          {% for d in p.directions_list() %}
-          <span class="dir-chip">{{ emoji_map.get(d,'') }} {{ d }}</span>
-          {% endfor %}
-        </div>
-        {% endif %}
+    {% if products %}
+    <div class="prod-grid" id="prodGrid">
+      {% set emoji_map = {
+        'Снижение веса':'⚖️','Правильное питание':'🥗','Здоровый образ жизни':'💚',
+        'Красота':'💄','Анти-стресс':'🧘','Долголетие':'⏳','Детокс':'🌿',
+        'Иммунитет':'🛡️','Пищеварение':'🌱','Энергия':'⚡'
+      } %}
 
-        <!-- Price -->
-        <div class="prod-price-row">
-          <div>
-            <div class="prod-price-main">${{ "%.2f"|format(p.price) }}</div>
-            {% if p.cost_price %}
-            <div class="prod-price-cost">Tan narxi: ${{ "%.2f"|format(p.cost_price) }}</div>
+      {% for p in products %}
+      <div class="pcard"
+           data-name="{{ p.name }}"
+           data-price="{{ p.price }}"
+           data-stock="{{ p.stock }}">
+
+        <!-- Image -->
+        <div class="pcard-img">
+          {% if p.image_url %}
+            <img src="{{ p.image_url }}" alt="{{ p.name }}"
+                 onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
+            <span class="pcard-emoji" style="display:none">
+              {% if p.category=='Коктейль' %}🥤{% elif p.category=='Напиток' %}💧{% elif p.category=='Витамины' %}💊{% elif p.category=='Красота' %}✨{% else %}🌿{% endif %}
+            </span>
+          {% else %}
+            <span class="pcard-emoji">
+              {% if p.category=='Коктейль' %}🥤{% elif p.category=='Напиток' %}💧{% elif p.category=='Витамины' %}💊{% elif p.category=='Красота' %}✨{% else %}🌿{% endif %}
+            </span>
+          {% endif %}
+
+          <!-- badges -->
+          <div class="pcard-badge-row">
+            <span class="pcard-stock {% if p.stock > 20 %}ok{% elif p.stock > 0 %}low{% else %}out{% endif %}">
+              {% if p.stock > 20 %}{{ p.stock }} dona
+              {% elif p.stock > 0 %}{{ p.stock }} qoldi
+              {% else %}Tugagan{% endif %}
+            </span>
+            {% if p.vid %}
+            <span class="pcard-vid">{{ p.vid }}</span>
             {% endif %}
           </div>
-          <div class="text-end">
-            <div class="margin-chip {% if p.profit_margin() >= 30 %}margin-good{% else %}margin-ok{% endif %}">
-              {{ p.profit_margin() }}% margin
+        </div>
+
+        <!-- Body -->
+        <div class="pcard-body">
+          <div class="pcard-cat">{{ p.category }}</div>
+          <div class="pcard-name">{{ p.name }}</div>
+          {% if p.description %}
+          <div class="pcard-desc">{{ p.description }}</div>
+          {% endif %}
+
+          {% if p.directions_list() %}
+          <div class="pcard-dirs">
+            {% for d in p.directions_list()[:3] %}
+            <span class="pcard-dir-chip">{{ emoji_map.get(d,'') }} {{ d }}</span>
+            {% endfor %}
+          </div>
+          {% endif %}
+
+          <div class="pcard-price-row">
+            <div>
+              <div class="pcard-price">${{ "%.2f"|format(p.price) }}</div>
+              {% if p.cost_price %}
+              <div class="pcard-cost">Tan: ${{ "%.2f"|format(p.cost_price) }}</div>
+              {% endif %}
             </div>
+            <span class="pcard-margin {% if p.profit_margin() >= 30 %}good{% else %}ok{% endif %}">
+              {{ p.profit_margin() }}%
+            </span>
           </div>
         </div>
 
-        <!-- Sostav & Recipe expandable -->
+        <!-- Expand panel -->
         {% if p.sostav or p.recipe %}
-        <div class="prod-expand" id="pe-{{ p.id }}">
+        <div class="pcard-expand" id="pe-{{ p.id }}">
           {% if p.sostav %}
-          <div class="mb-2">
-            <div class="expand-label">🧪 Состав / Tarkib</div>
-            <div class="expand-text">{{ p.sostav }}</div>
-          </div>
+          <div class="elbl">🧪 Tarkib</div>
+          <div class="etxt">{{ p.sostav }}</div>
           {% endif %}
           {% if p.recipe %}
-          <div>
-            <div class="expand-label">📋 Рецепт / Ishlatish</div>
-            <div class="expand-text">{{ p.recipe }}</div>
-          </div>
+          <div class="elbl">📋 Ishlatish</div>
+          <div class="etxt">{{ p.recipe }}</div>
           {% endif %}
         </div>
         {% endif %}
 
         <!-- Actions -->
-        <div class="prod-actions">
+        <div class="pcard-actions">
+          <a href="{{ url_for('order_add') }}?pid={{ p.id }}"
+             class="btn-sell {% if p.stock == 0 %}disabled{% endif %}">
+            <i class="bi bi-cart-plus"></i> Sotish
+          </a>
           {% if p.sostav or p.recipe %}
-          <button class="btn btn-ghost" onclick="toggleProd({{ p.id }},this)">
-            <i class="bi bi-info-circle me-1"></i>Tarkib
+          <button class="btn-icon" onclick="toggleProd({{ p.id }},this)" title="Tarkib">
+            <i class="bi bi-info-circle"></i>
           </button>
           {% endif %}
-          <a href="{{ url_for('order_add') }}?pid={{ p.id }}" class="btn btn-hl btn-sm"
-             title="Sotish" {% if p.stock == 0 %}style="opacity:.5;pointer-events:none"{% endif %}>
-            <i class="bi bi-cart-plus me-1"></i>Sotish
-          </a>
-          <a href="{{ url_for('product_edit', pid=p.id) }}" class="btn btn-hl-outline" style="flex:0">
+          <a href="{{ url_for('product_edit', pid=p.id) }}" class="btn-icon" title="Tahrirlash">
             <i class="bi bi-pencil"></i>
           </a>
           <form method="post" action="{{ url_for('product_delete', pid=p.id) }}"
-                onsubmit="return confirm('{{ p.name }} o\'chirilsinmi?')" style="flex:0">
-            <button class="btn btn-outline-danger"><i class="bi bi-trash"></i></button>
+                onsubmit="return confirm('{{ p.name }} o\'chirilsinmi?')">
+            <button type="submit" class="btn-icon danger" title="O'chirish">
+              <i class="bi bi-trash"></i>
+            </button>
           </form>
         </div>
       </div>
+      {% endfor %}
     </div>
-  </div>
-  {% endfor %}
-</div>
 
-{% else %}
-<div class="empty-state card-box">
-  <div class="empty-icon">📦</div>
-  <p>Mahsulot topilmadi</p>
-  <a href="{{ url_for('products') }}" class="btn btn-ghost me-2">Filtrni tozalash</a>
-  <a href="{{ url_for('product_add') }}" class="btn btn-hl">Yangi mahsulot</a>
+    {% else %}
+    <div class="cat-empty">
+      <div class="eicon">📦</div>
+      <p>Mahsulot topilmadi</p>
+      <a href="{{ url_for('products') }}" class="btn btn-ghost me-2">Filtrni tozalash</a>
+      <a href="{{ url_for('product_add') }}" class="btn btn-hl">Yangi mahsulot</a>
+    </div>
+    {% endif %}
+  </div>
 </div>
-{% endif %}
 {% endblock %}
 
 {% block scripts %}
 <script>
+function toggleSection(el) {
+  el.classList.toggle('open');
+  const body = el.nextElementSibling;
+  body.style.display = body.style.display === 'none' ? '' : 'none';
+}
+
 function toggleProd(id, btn) {
   const el = document.getElementById('pe-' + id);
   const open = el.style.display === 'block';
   el.style.display = open ? 'none' : 'block';
-  btn.innerHTML = open
-    ? '<i class="bi bi-info-circle me-1"></i>Tarkib'
-    : '<i class="bi bi-x-circle me-1"></i>Yopish';
-  btn.classList.toggle('btn-ghost', open);
-  btn.classList.toggle('btn-hl', !open);
+  btn.innerHTML = open ? '<i class="bi bi-info-circle"></i>' : '<i class="bi bi-x-circle"></i>';
+  btn.style.borderColor = open ? '' : '#00723F';
+  btn.style.color = open ? '' : '#00723F';
+}
+
+function sortProducts(val) {
+  const grid = document.getElementById('prodGrid');
+  const cards = [...grid.querySelectorAll('.pcard')];
+  cards.sort((a,b) => {
+    if (val === 'name_asc')   return a.dataset.name.localeCompare(b.dataset.name);
+    if (val === 'name_desc')  return b.dataset.name.localeCompare(a.dataset.name);
+    if (val === 'price_asc')  return parseFloat(a.dataset.price) - parseFloat(b.dataset.price);
+    if (val === 'price_desc') return parseFloat(b.dataset.price) - parseFloat(a.dataset.price);
+    if (val === 'stock_desc') return parseFloat(b.dataset.stock) - parseFloat(a.dataset.stock);
+    return 0;
+  });
+  cards.forEach(c => grid.appendChild(c));
 }
 </script>
 {% endblock %}
